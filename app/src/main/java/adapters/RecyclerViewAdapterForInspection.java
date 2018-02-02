@@ -1,11 +1,9 @@
-package devs.southpaw.com.inspectionpro;
+package adapters;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.support.annotation.ColorRes;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
@@ -13,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -22,6 +19,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
+import devs.southpaw.com.inspectionpro.R;
+import layout.InspectionDetailsActivity;
 import objects.Inspection;
 
 /**

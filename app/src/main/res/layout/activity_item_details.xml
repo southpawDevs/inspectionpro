@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="devs.southpaw.com.inspectionpro.ItemDetailsActivity">
+    tools:context="devs.southpaw.com.inspectionpro.layout.ItemDetailsActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -17,7 +17,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:focusable="true"
+            android:focusableInTouchMode="true">
 
             <ImageView
                 android:id="@+id/item_image_view"
@@ -68,8 +70,53 @@
                 android:background="@color/colorAccent"
                 android:textColor="@color/colorPrimaryWhite"
                 android:fontFamily="@font/oxygen_bold"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:id="@+id/submit_button"/>
 
+           <ImageView
+               android:layout_width="match_parent"
+               android:layout_height="250dp"
+               android:layout_gravity="center"
+               android:scaleType="fitCenter"
+               android:id="@+id/snapshot_image_view"
+               android:background="@color/colorBlack"
+               android:layout_margin="20dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ORANGE"
+                    android:background="@color/colorStatusOrange"
+                    android:layout_weight="1"
+                    android:textColor="@color/colorPrimaryWhite"
+                    android:fontFamily="@font/oxygen_bold"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GREEN"
+                    android:background="@color/colorStatusGreen"
+                    android:layout_weight="1"
+                    android:textColor="@color/colorPrimaryWhite"
+                    android:fontFamily="@font/oxygen_bold"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RED"
+                    android:background="@color/colorStatusRed"
+                    android:layout_weight="1"
+                    android:textColor="@color/colorPrimaryWhite"
+                    android:fontFamily="@font/oxygen_bold"/>
+
+
+
+            </LinearLayout>
         </LinearLayout>
 
     </ScrollView>

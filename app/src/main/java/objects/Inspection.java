@@ -19,6 +19,8 @@ public class Inspection{
     private int inspectionStatus;
     private ArrayList<InspectionItem> items = new ArrayList<>();
 
+    //add department ( marine , drilling)
+
     //constructor
     public Inspection(String inspectionName, String inspectionID, long inspectionCreatedAt, String inspectionCreatedBy, long inspectionModifiedAt, String inspectionModifiedBy, int inspectionStatus) {
         this.inspectionName = inspectionName;

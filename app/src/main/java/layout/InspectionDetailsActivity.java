@@ -1,29 +1,26 @@
-package devs.southpaw.com.inspectionpro;
+package layout;
 
-import android.content.Context;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import devs.southpaw.com.inspectionpro.R;
+import adapters.RecyclerViewAdapterForItem;
 import objects.Inspection;
 import objects.InspectionItem;
 
-public class InspectionDetailsActivity extends AppCompatActivity implements RecyclerViewAdapterForItem.RecyclerItemClickListener{
+public class InspectionDetailsActivity extends AppCompatActivity implements RecyclerViewAdapterForItem.RecyclerItemClickListener {
 
     public static final String EXTRA_NAME = "no_name";
     public Inspection selectedInspection;

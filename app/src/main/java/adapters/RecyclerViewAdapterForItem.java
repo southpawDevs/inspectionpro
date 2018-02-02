@@ -1,4 +1,4 @@
-package devs.southpaw.com.inspectionpro;
+package adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +15,8 @@ import com.google.gson.Gson;
 
 import java.util.List;
 
-import objects.Inspection;
+import devs.southpaw.com.inspectionpro.R;
+import layout.ItemDetailsActivity;
 import objects.InspectionItem;
 
 /**

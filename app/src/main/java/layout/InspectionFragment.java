@@ -1,7 +1,6 @@
 package layout;
 
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -17,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import devs.southpaw.com.inspectionpro.R;
-import devs.southpaw.com.inspectionpro.RecyclerViewAdapterForInspection;
+import adapters.RecyclerViewAdapterForInspection;
 import objects.Inspection;
 import objects.InspectionItem;
 
