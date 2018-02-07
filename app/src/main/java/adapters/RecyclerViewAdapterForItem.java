@@ -26,11 +26,17 @@ import objects.InspectionItem;
 public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerViewAdapterForItem.ViewHolder> {
 
     private List<InspectionItem> inspectionItemsData;
+    String inspectionName;
 
     final private RecyclerViewAdapterForItem.RecyclerItemClickListener mOnClickListener;
 
     private static int viewHolderCount;
     private int mNumberItems;
+
+    public RecyclerViewAdapterForItem(List<InspectionItem> itemsData) {
+        this.inspectionItemsData = itemsData;
+        mOnClickListener = null;
+    }
 
     public interface RecyclerItemClickListener {
         void onListItemClick(int clickedItemIndex);
@@ -57,13 +63,13 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
     @Override
     public void onBindViewHolder(RecyclerViewAdapterForItem.ViewHolder holder, int position) {
         //set the title
-        holder.inspectionTitle.setText(inspectionItemsData.get(position).getItemName());
-        holder.inspectionDescription.setText(inspectionItemsData.get(position).getItemMethod());
+        holder.inspectionTitle.setText(inspectionItemsData.get(position).getItem_name());
+        holder.inspectionDescription.setText(inspectionItemsData.get(position).getItem_method());
 
         //handle status
-        Log.d("item status", String.valueOf(inspectionItemsData.get(position).getItemStatus()));
+        Log.d("item status", String.valueOf(inspectionItemsData.get(position).getItem_status()));
 
-        switch (inspectionItemsData.get(position).getItemStatus()){
+        switch (inspectionItemsData.get(position).getItem_status()){
             case 0:
                 //new
                 holder.cardStatus.setCardBackgroundColor(Color.parseColor("#eaeaea"));
@@ -116,7 +122,7 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
         @Override
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
-            mOnClickListener.onListItemClick(clickedPosition);
+            //mOnClickListener.onListItemClick(clickedPosition);
             Log.d("clicked", "tapped");
 
             InspectionItem selectedItem = inspectionItemsData.get(clickedPosition);
@@ -128,9 +134,26 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
             //intent when clicked
             Intent intentItemDetail =  new Intent(context, ItemDetailsActivity.class);
             intentItemDetail.putExtra("selected_item" , itemJson);
+            intentItemDetail.putExtra("inspection_name" , inspectionName);
 
             //Log.d("merchant_name", inspectionItemsData.get(clickedPosition).getInspectionName());
             context.startActivity(intentItemDetail);
         }
+    }
+
+    public void getInspectionNameToItemAdapter(String name){
+        inspectionName = name;
+    }
+
+    // Clean all elements of the recycler
+    public void clear() {
+        inspectionItemsData.clear();
+        notifyDataSetChanged();
+    }
+
+    // Add a list of items -- change to type used
+    public void addAll(List<InspectionItem> list) {
+        inspectionItemsData.addAll(list);
+        notifyDataSetChanged();
     }
 }

@@ -9,6 +9,7 @@
     <color name="colorStatusGrey">#eaeaea</color>
     <color name="colorStatusRed">#fa4048</color>
     <color name="colorStatusOrange">#F49A27</color>
+    <color name="colorLightGrey">#F7F7F7</color>
 
 
 </resources>

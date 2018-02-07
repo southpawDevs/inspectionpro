@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 
 import devs.southpaw.com.inspectionpro.R;
-import objects.Inspection;
 import objects.InspectionItem;
 
 public class ItemDetailsActivity extends AppCompatActivity {
@@ -27,6 +26,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     private Button submitButton;
     private ImageView snapshotImageView;
     InspectionItem selectedItem;
+    String inspectionName;
 
     private int REQUEST_CODE = 1888;
 
@@ -48,6 +48,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
         // Deserialization
         String itemJson= getIntent().getStringExtra("selected_item");
+        inspectionName = getIntent().getStringExtra("inspection_name");
         Log.d("itemJson", itemJson);
 
         Gson gson = new Gson();
@@ -55,7 +56,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
         populateScreenData();
 
-        actionBar.setTitle(selectedItem.getItemName());
+        actionBar.setTitle(inspectionName + "/" + selectedItem.getItem_name());
 
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,10 +95,10 @@ public class ItemDetailsActivity extends AppCompatActivity {
     }
 
     void populateScreenData(){
-
-        String description =  selectedItem.getItemName();
-        String method = selectedItem.getItemMethod();
-        String condition = selectedItem.getItemCondition();
+        String name = selectedItem.getItem_name();
+        String description =  selectedItem.getItem_description();
+        String method = selectedItem.getItem_method();
+        String condition = selectedItem.getItem_condition();
 
         itemDescription.setText("Title: " + description);
         itemMethod.setText("Method: " + method);

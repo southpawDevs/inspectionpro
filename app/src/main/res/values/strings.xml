@@ -4,6 +4,13 @@
     <string name="title_action">Action Items</string>
     <string name="title_archives">Archives</string>
 
+    <string name="inspection_create">Create New Inspection</string>
+    <string name="inspection_item_create">Create New Item</string>
+
+
+    //info
+    <string name="info_submit_inspection">Inspection can only be submitted if all items are checked within the same day. Click the \"SUBMIT INSPECTION\" button to submit</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_login">Sign in</string>

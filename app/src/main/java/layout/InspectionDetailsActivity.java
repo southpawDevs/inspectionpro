@@ -1,5 +1,8 @@
 package layout;
 
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -7,9 +10,17 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -29,8 +40,11 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
     private LinearLayoutManager mLayoutManager;
     private RecyclerViewAdapterForItem itemsAdapter;
+    private SwipeRefreshLayout refreshContainer;
     RecyclerView recyclerView;
     TextView completedCount;
+
+    Boolean refreshing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +52,24 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         setContentView(R.layout.activity_inspection_details);
 
         completedCount = (TextView) findViewById(R.id.count_text_view);
+
+        //handle pull refreshing container
+        refreshContainer = (SwipeRefreshLayout) findViewById(R.id.refresh_container_detail);
+        refreshContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (itemsAdapter != null){
+                    itemsAdapter.clear();
+                }
+                refreshing = true;
+                getItemsDataFromFireStore();
+            }
+        });
+
+        refreshContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_items);
         mLayoutManager = new LinearLayoutManager(this);
@@ -53,17 +85,16 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         Gson gson = new Gson();
         selectedInspection = gson.fromJson(inspectionJson, Inspection.class);
 
-        itemsData = selectedInspection.getInspectionItems();
-
-        //handle recycler view
-        itemsAdapter = new RecyclerViewAdapterForItem(itemsData, this);
-        recyclerView.setAdapter(itemsAdapter);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        handleItemCompletion(itemsData);
+        getItemsDataFromFireStore();
 
         //set title in action bar after deserializing data
-        actionBar.setTitle(selectedInspection.getInspectionName());
+        actionBar.setTitle(selectedInspection.getInspection_name());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.items_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -79,9 +110,16 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == android.R.id.home) {
-            Log.d("clicked", "action bar clicked");
-            finish();
+        switch (id) {
+            // action with ID action_refresh was selected
+            case R.id.inspection_item_create:
+                Intent createIntent = new Intent(getApplicationContext(), InspectionItemAddActivity.class);
+                startActivity(createIntent);
+                break;
+
+            case android.R.id.home:
+                Log.d("clicked", "action bar clicked");
+                finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -92,7 +130,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         int itemsCompletedCount = 0;
         for(int l=0; l<items.size(); l++){
 
-            if (items.get(l).getItemStatus() == 2){
+            if (items.get(l).getItem_status() == 2){
                 itemsCompletedCount += 1;
             }//end if
 
@@ -102,4 +140,51 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         completedCount.setText(String.valueOf(itemsCompletedCount) + "/" + String.valueOf(items.size()) + "completed");
     }
 
+
+    private void getItemsDataFromFireStore(){
+
+        refreshContainer.setRefreshing(true);
+
+        final String FireStoreTAG = "firestoreTag";
+        String selectedInspectionID = selectedInspection.getInspection_id();
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+
+        CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
+        CollectionReference itemsColl = inspectionsColl.document(selectedInspectionID).collection("items");
+
+        final List<InspectionItem> items = new ArrayList<>();
+
+        itemsColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (DocumentSnapshot document : task.getResult()) {
+
+                        if (document != null) {
+                            InspectionItem item = document.toObject(InspectionItem.class);
+                            itemsData.add(item);
+                        } else {
+                            Log.d(FireStoreTAG, "No such document");
+                        }
+                    }
+
+                } else {
+                    Log.d(FireStoreTAG, "Error getting documents: ", task.getException());
+
+                }
+
+                //handle recycler view
+                itemsAdapter = new RecyclerViewAdapterForItem(itemsData);
+                itemsAdapter.getInspectionNameToItemAdapter(selectedInspection.getInspection_name());
+                recyclerView.setAdapter(itemsAdapter);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+                handleItemCompletion(itemsData);
+
+                refreshContainer.setRefreshing(false);
+            }
+        });
+    }
 }

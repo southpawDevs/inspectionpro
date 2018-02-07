@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/inspection_item_create"
+        android:orderInCategory="100"
+        android:title="@string/inspection_item_create"
+        app:showAsAction="never"
+        android:iconTint="@color/colorPrimaryWhite"/>
+</menu>

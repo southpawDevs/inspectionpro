@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -41,6 +42,11 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
     }
 
+    public RecyclerViewAdapterForInspection(List<Inspection> inspectionsData) {
+        this.inspectionsData = inspectionsData;
+        mOnClickListener = null;
+    }
+
     public RecyclerViewAdapterForInspection(List<Inspection> inspectionsData, RecyclerItemClickListener mOnClickListener) {
         this.inspectionsData = inspectionsData;
         this.mOnClickListener = mOnClickListener;
@@ -63,14 +69,14 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
     public void onBindViewHolder(RecyclerViewAdapterForInspection.ViewHolder holder, int position) {
 
         //set the title
-        holder.inspectionTitle.setText(inspectionsData.get(position).getInspectionName());
+        holder.inspectionTitle.setText(inspectionsData.get(position).getInspection_name());
 
         //set last modified
-        String dateString = getDate(inspectionsData.get(position).getInspectionModifiedAt());
+        String dateString = getDateFromDate(inspectionsData.get(position).getInspection_modified_at());
         holder.inspectionLastChecked.setText("Last checked: " + dateString);
 
         //set card background color
-        switch (inspectionsData.get(position).getInspectionStatus()){
+        switch (inspectionsData.get(position).getInspection_status()){
             case 0:
                 //new
                 holder.cardBackground.setCardBackgroundColor(Color.parseColor("#eaeaea"));
@@ -127,7 +133,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
         @Override
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
-            mOnClickListener.onListItemClick(clickedPosition);
+//            mOnClickListener.onListItemClick(clickedPosition);
             Log.d("clicked", "tapped");
 
             Inspection selectedInspection = inspectionsData.get(clickedPosition);
@@ -137,19 +143,19 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
             String inspectionJson = gson.toJson(selectedInspection);
 
             //intent when clicked
-            Intent intentShopDetail =  new Intent(context, InspectionDetailsActivity.class);
-            intentShopDetail.putExtra(InspectionDetailsActivity.EXTRA_NAME , inspectionsData.get(clickedPosition).getInspectionName());
-            intentShopDetail.putExtra("inspection", inspectionJson);
+            Intent intentInspectionDetail =  new Intent(context, InspectionDetailsActivity.class);
+            intentInspectionDetail.putExtra(InspectionDetailsActivity.EXTRA_NAME , inspectionsData.get(clickedPosition).getInspection_name());
+            intentInspectionDetail.putExtra("inspection", inspectionJson);
 
-            Log.d("merchant_name", inspectionsData.get(clickedPosition).getInspectionName());
-            context.startActivity(intentShopDetail);
+            Log.d("merchant_name", inspectionsData.get(clickedPosition).getInspection_name());
+            context.startActivity(intentInspectionDetail);
         }
     }
 
     //helper & formatting
-    private String getDate(long time) {
+    private String getDateFromDate(Date time) {
         Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-        cal.setTimeInMillis(time * 1000);
+        //cal.setTimeInMillis(time * 1000);
         String date = DateFormat.format("dd-MMM-yyyy", cal).toString();
         return date;
     }

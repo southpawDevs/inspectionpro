@@ -8,46 +8,56 @@ import android.media.Image;
 
 public class InspectionItem {
 
-    private String itemID;
-    private String itemDescription;
-    private String itemMethod;
-    private int itemPhoto;
-    private String itemCondition;
-    private String itemComments;
-    private long itemModifiedAt;
-    private String itemModifiedBy;
-    private int itemStatus;
-    private String inspectionID;
-    private Image itemNewPhoto;
+    private String item_id;
+    private String item_name;
+    private String item_description;
+    private String item_method;
+    private int item_photo;
+    private String item_condition;
+    private String item_comments;
+    private long item_modified_at;
+    private String item_modified_by;
+    private int item_status;
+    private String inspection_id;
+    private Image item_new_photo;
+
+    public InspectionItem(){
+
+    }
 
     //constructor
     public InspectionItem(String itemID, String itemDescription, String itemMethod, int itemPhoto, String itemCondition, String itemComments, long itemModifiedAt, String itemModifiedBy, int itemStatus) {
-        this.itemID = itemID;
-        this.itemDescription = itemDescription;
-        this.itemMethod = itemMethod;
-        this.itemCondition = itemCondition;
-        this.itemPhoto = itemPhoto;
-        this.itemComments = itemComments;
-        this.itemModifiedAt = itemModifiedAt;
-        this.itemModifiedBy = itemModifiedBy;
-        this.itemStatus = itemStatus;
+        this.item_id = itemID;
+        this.item_description = itemDescription;
+        this.item_method = itemMethod;
+        this.item_condition = itemCondition;
+        this.item_photo = itemPhoto;
+        this.item_comments = itemComments;
+        this.item_modified_at = itemModifiedAt;
+        this.item_modified_by = itemModifiedBy;
+        this.item_status = itemStatus;
     }
 
     //getters
-    public String getItemName() {
-        return itemDescription;
+    public String getItem_name() {
+        return item_name;
     }
 
-    public int getItemStatus() {
-        return itemStatus;
+    public String getItem_description(){
+        return item_description;
     }
 
-    public String getItemMethod() {
-        return itemMethod;
+
+    public int getItem_status() {
+        return item_status;
     }
 
-    public String getItemCondition() {
-        return itemCondition;
+    public String getItem_method() {
+        return item_method;
+    }
+
+    public String getItem_condition() {
+        return item_condition;
     }
 
 }

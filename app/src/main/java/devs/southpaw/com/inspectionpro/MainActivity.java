@@ -5,27 +5,35 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -43,6 +51,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import java.util.Arrays;
 import java.util.List;
 
+import layout.InspectionAddActivity;
 import layout.InspectionFragment;
 
 public class MainActivity extends AppCompatActivity implements InspectionFragment.OnFragmentInteractionListener{
@@ -62,11 +71,9 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                     selectFragment(item);
                     return true;
                 case R.id.navigation_action:
-                    selectFragment(item);
-                    return true;
+                    break;
                 case R.id.navigation_archives:
-                    selectFragment(item);
-                    return true;
+                    break;
             }
             return false;
         }
@@ -75,12 +82,39 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
 
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mBottomNav = (BottomNavigationView) findViewById(R.id.bottomNavigation);
         mBottomNav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        //create the drawer and remember the `Drawer` result object
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        toolbar.inflateMenu(R.menu.inspection_menu);
+
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId())
+                {
+                    case R.id.inspection_create: //Your task
+                        Intent createIntent = new Intent(getApplicationContext(), InspectionAddActivity.class);
+                        startActivity(createIntent);
+                        return true;
+
+                    default:return false;
+                }
+            }
+        });
+
 
         //set drawer
         handleNavigationDrawer();
@@ -146,12 +180,12 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
     private void handleNavigationDrawer(){
         new DrawerBuilder().withActivity(this).build();
 
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        FirebaseUser user = auth.getCurrentUser();
+
         //if you want to update the items at a later time it is recommended to keep it in a variable
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("HOME").withIconColorRes(R.color.colorPrimaryDark);
         SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("SETTINGS");
-
-        //create the drawer and remember the `Drawer` result object
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         // Create the AccountHeader
         AccountHeader headerResult = new AccountHeaderBuilder()
@@ -159,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                 .withHeaderBackground(R.color.colorPrimaryDark)
                 .withSelectionListEnabledForSingleProfile(false)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("Keith").withEmail("keith@gmail.com").withIcon(getResources().getDrawable(R.drawable.icon_profile))
+                        new ProfileDrawerItem().withName(user.getDisplayName()).withEmail(user.getEmail()).withIcon(user.getPhotoUrl())
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
@@ -187,7 +221,17 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         // do something with the clicked item :D
-                        return false;
+                        if (position == 6){
+                            FirebaseAuth.getInstance().signOut();
+
+                            Intent loginIntent = new Intent(getBaseContext(), SplashScreenActivity.class);
+                            loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(loginIntent);
+
+                            return  true;
+                        }else {
+                            return false;
+                        }
                     }
                 })
                 .build();
@@ -199,6 +243,15 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         result.addItem(new DividerDrawerItem());
         result.addStickyFooterItem(new PrimaryDrawerItem().withName("Switch to admin"));
 
+    }
+
+
+    public static void tintMenuIcon(Context context, MenuItem item, @ColorRes int color) {
+        Drawable normalDrawable = item.getIcon();
+        Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
+        DrawableCompat.setTint(wrapDrawable, context.getResources().getColor(color));
+
+        item.setIcon(wrapDrawable);
     }
 
 }
