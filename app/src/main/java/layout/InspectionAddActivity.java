@@ -80,32 +80,40 @@ public class InspectionAddActivity extends AppCompatActivity {
         }else if (TextUtils.isEmpty(days)){
             Toast.makeText(getBaseContext(),"Please fill in inspection days", Toast.LENGTH_SHORT).show();
         }else{
-            createNewInspection();
+
+            Date currentDate = new Date();
+            int daysCount = Integer.parseInt(dayCountEditText.getText().toString());
+
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            FirebaseUser user = auth.getCurrentUser();
+
+            //initialize newInspection Object
+            Inspection newInspection = new Inspection(title, currentDate, user.getUid(), null, null, 0, 0, daysCount);
+
+            Log.d("Firebase User Auth", user.getUid());
+            createNewInspection(newInspection);
         }
     }
 
-    private void createNewInspection(){
+    private void createNewInspection(Inspection object){
 
         progressBar.setVisibility(View.VISIBLE);
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseUser user = auth.getCurrentUser();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
 
-        Date currentDate = new Date();
-
-        String title = nameEditText.getText().toString();
-        int daysCount = Integer.parseInt(dayCountEditText.getText().toString());
-
-        Inspection newInspection = new Inspection(title, currentDate, user.getUid(), null, null, 0, 0, daysCount);
-        devHousePropertyDoc.collection("inspections").add(newInspection)
+        devHousePropertyDoc.collection("inspections").add(object)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
+
+                        //re-add firebase auto id to field
                         documentReference.update("inspection_id", documentReference.getId());
+
                         Log.d("Add Firestore", "DocumentSnapshot written with ID: " + documentReference.getId());
+
                         progressBar.setVisibility(View.INVISIBLE);
+
                         Toast.makeText(getBaseContext(),"Inspection Added", Toast.LENGTH_SHORT).show();
                                 finish();
                     }
@@ -113,8 +121,11 @@ public class InspectionAddActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+
                         Log.w("Add Firestore", "Error adding document", e);
+
                         Toast.makeText(getBaseContext(),"Fail to add inspection", Toast.LENGTH_SHORT).show();
+
                         progressBar.setVisibility(View.INVISIBLE);
                     }
                 });

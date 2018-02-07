@@ -1,5 +1,6 @@
 package layout;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -9,10 +10,13 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -44,7 +48,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
     RecyclerView recyclerView;
     TextView completedCount;
 
-    Boolean refreshing;
+    Boolean refreshing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +66,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                     itemsAdapter.clear();
                 }
                 refreshing = true;
-                getItemsDataFromFireStore();
+                getItemsDataFromFireStore(true);
             }
         });
 
@@ -70,6 +74,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
+
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_items);
         mLayoutManager = new LinearLayoutManager(this);
@@ -85,8 +90,6 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         Gson gson = new Gson();
         selectedInspection = gson.fromJson(inspectionJson, Inspection.class);
 
-        getItemsDataFromFireStore();
-
         //set title in action bar after deserializing data
         actionBar.setTitle(selectedInspection.getInspection_name());
     }
@@ -95,6 +98,16 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.items_menu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (itemsAdapter != null){
+            itemsAdapter.clear();
+        }
+        getItemsDataFromFireStore(true);
     }
 
     @Override
@@ -114,6 +127,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
             // action with ID action_refresh was selected
             case R.id.inspection_item_create:
                 Intent createIntent = new Intent(getApplicationContext(), InspectionItemAddActivity.class);
+                createIntent.putExtra("inspection_id", selectedInspection.getInspection_id());
                 startActivity(createIntent);
                 break;
 
@@ -133,15 +147,13 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
             if (items.get(l).getItem_status() == 2){
                 itemsCompletedCount += 1;
             }//end if
-
-
         }//end loop
 
-        completedCount.setText(String.valueOf(itemsCompletedCount) + "/" + String.valueOf(items.size()) + "completed");
+        completedCount.setText(String.valueOf(itemsCompletedCount) + "/" + String.valueOf(items.size()) + " completed");
     }
 
 
-    private void getItemsDataFromFireStore(){
+    private void getItemsDataFromFireStore(final Boolean isRefreshing){
 
         refreshContainer.setRefreshing(true);
 
@@ -167,12 +179,13 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                             itemsData.add(item);
                         } else {
                             Log.d(FireStoreTAG, "No such document");
+                            Toast.makeText(getBaseContext(),"Fail to retrieve", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                 } else {
                     Log.d(FireStoreTAG, "Error getting documents: ", task.getException());
-
+                    Toast.makeText(getBaseContext(),"Couldn't refresh", Toast.LENGTH_SHORT).show();
                 }
 
                 //handle recycler view
@@ -184,6 +197,15 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 handleItemCompletion(itemsData);
 
                 refreshContainer.setRefreshing(false);
+
+                if (isRefreshing == true){
+
+                    refreshing = false;
+                }else{
+
+                }
+
+
             }
         });
     }

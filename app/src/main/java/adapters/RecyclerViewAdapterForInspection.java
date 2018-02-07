@@ -73,7 +73,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
         //set last modified
         String dateString = getDateFromDate(inspectionsData.get(position).getInspection_modified_at());
-        holder.inspectionLastChecked.setText("Last checked: " + dateString);
+        holder.inspectionLastChecked.setText("Due in: " + dateString);
 
         //set card background color
         switch (inspectionsData.get(position).getInspection_status()){

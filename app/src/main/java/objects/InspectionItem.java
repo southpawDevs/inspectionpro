@@ -2,6 +2,8 @@ package objects;
 
 import android.media.Image;
 
+import java.util.Date;
+
 /**
  * Created by keith on 30/01/2018.
  */
@@ -12,10 +14,10 @@ public class InspectionItem {
     private String item_name;
     private String item_description;
     private String item_method;
-    private int item_photo;
+    private String item_photo;
     private String item_condition;
     private String item_comments;
-    private long item_modified_at;
+    private Date item_modified_at;
     private String item_modified_by;
     private int item_status;
     private String inspection_id;
@@ -26,8 +28,8 @@ public class InspectionItem {
     }
 
     //constructor
-    public InspectionItem(String itemID, String itemDescription, String itemMethod, int itemPhoto, String itemCondition, String itemComments, long itemModifiedAt, String itemModifiedBy, int itemStatus) {
-        this.item_id = itemID;
+    public InspectionItem(String itemName, String itemDescription, String itemMethod, String itemCondition, String itemPhoto, String itemComments, Date itemModifiedAt, String itemModifiedBy, int itemStatus) {
+        this.item_name = itemName;
         this.item_description = itemDescription;
         this.item_method = itemMethod;
         this.item_condition = itemCondition;
@@ -47,7 +49,6 @@ public class InspectionItem {
         return item_description;
     }
 
-
     public int getItem_status() {
         return item_status;
     }
@@ -58,6 +59,27 @@ public class InspectionItem {
 
     public String getItem_condition() {
         return item_condition;
+    }
+
+    public String getItem_comments() {
+        return item_comments;
+    }
+
+    public String getItem_photo() {
+        return item_photo;
+    }
+
+    public String getItem_modified_by() {
+        return item_modified_by;
+    }
+
+    public Date getItem_modified_at() {
+        return item_modified_at;
+    }
+
+    //setters
+    public void setItem_name(String itemName) {
+        this.item_name = itemName;
     }
 
 }

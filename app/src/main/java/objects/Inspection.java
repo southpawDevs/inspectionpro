@@ -74,6 +74,11 @@ public class Inspection{
 
     public int getInspection_items_count(){return inspection_items_count;}
 
+    //get itemArray
+    public ArrayList<InspectionItem> getInspectionItems() {
+        return items;
+    }
+
     //setters
     public void setInspection_name(String inspectionName) {
         this.inspection_name = inspectionName;
@@ -93,11 +98,6 @@ public class Inspection{
 
     public void  setInspection_items_count(int count){this.inspection_items_count = count;}
 
-
-    //get itemArray
-    public ArrayList<InspectionItem> getInspectionItems() {
-        return items;
-    }
 
     //set itemArray
     public void setInspectionItems(ArrayList<InspectionItem> inspectionItems) {

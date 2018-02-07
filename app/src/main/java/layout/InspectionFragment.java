@@ -126,28 +126,6 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
 
         getInspectionDataFromFireStore(refreshing);
 
-//        //populate data
-//        Inspection inspex1 = new Inspection("Pre Rig Up Drops Inspection Wireline Sheaves", "0001",1517288692,"keef", 1517288692, "null", 0);
-//        Inspection inspex2 = new Inspection("Inspection 2","0002", 1517294980, "", 1517294980, "null", 1);
-//        Inspection inspex3 = new Inspection(" Inspection 3","0003", 1517294980, "", 1517294980, "null", 2);
-//
-//        InspectionItem item1 = new InspectionItem("i_01", "Sheave Hangar", "Suspended in Elevators", 0123, "Check for wear and tear and Elevator ID is sufficient for the size of the Hangar", "no comments", 1517294980, "user 1", 0);
-//        InspectionItem item2 = new InspectionItem("i_02", "Swivel", "Swivel Screws", 456, "Check all screws are made up on bottom of swivel", "fix it asap", 1517294980, "user 2", 1);
-//        InspectionItem item3 = new InspectionItem("i_03", "Sheave Pin", "Castle nut with split pin", 456, "Check Castle nut has been installed and split pin secured", "fix it asap", 1517294980, "user 3", 2);
-//
-//
-//        ArrayList<InspectionItem> itemsArray = new ArrayList<>();
-//        itemsArray.add(item1);
-//        itemsArray.add(item2);
-//        itemsArray.add(item3);
-//
-//        inspex1.setInspectionItems(itemsArray);
-
- //       inspectionsData.add(inspex1);
-//        inspectionsData.add(inspex2);
-//        inspectionsData.add(inspex3);
-
-
         return view;
     }
 
@@ -196,10 +174,12 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
                            }
                         } else {
                             Log.d(FireStoreTAG, "No such document");
+                            Toast.makeText(getContext(),"Fail to retrieve", Toast.LENGTH_SHORT).show();
                         }
                     }
                 } else {
                     Log.d(FireStoreTAG, "Error getting documents: ", task.getException());
+                    Toast.makeText(getContext(),"Couldn't refresh", Toast.LENGTH_SHORT).show();
                 }
 
                 inspectionAdapter = new RecyclerViewAdapterForInspection(inspections);
@@ -210,7 +190,6 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
                 refreshContainer.setRefreshing(false);
                 if (isRefreshing == true){
 
-                    Toast.makeText(getContext(),"Inspection Updated", Toast.LENGTH_LONG).show();
                     refreshing = false;
                 }else{
 
