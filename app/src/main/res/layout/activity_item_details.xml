@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="devs.southpaw.com.inspectionpro.layout.ItemDetailsActivity">
+    tools:context="layout.ItemDetailsActivity">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -56,12 +56,31 @@
                 android:text="inspection detail"
                 android:textSize="18sp" />
 
-            <EditText
+
+            <android.support.v7.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:fontFamily="@font/oxygen"
-                android:hint="add comment.."/>
+                android:orientation="horizontal">
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:fontFamily="@font/oxygen"
+                    android:hint="add comment.."
+                    android:layout_weight="3"
+                    android:id="@+id/item_comment_edit_text"
+                    android:imeOptions="actionDone"/>
+
+                <Button
+                    android:layout_width="80dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:text="SEND"
+                    android:id="@+id/update_comment_button"/>
+
+            </android.support.v7.widget.LinearLayoutCompat>
+
 
             <Button
                 android:layout_width="match_parent"
@@ -71,21 +90,32 @@
                 android:textColor="@color/colorPrimaryWhite"
                 android:fontFamily="@font/oxygen_bold"
                 android:layout_margin="10dp"
-                android:id="@+id/submit_button"/>
+                android:id="@+id/add_condition_image_button"/>
 
-           <ImageView
+           <android.support.constraint.ConstraintLayout
                android:layout_width="match_parent"
-               android:layout_height="250dp"
-               android:layout_gravity="center"
-               android:scaleType="fitCenter"
-               android:id="@+id/snapshot_image_view"
-               android:background="@color/colorBlack"
-               android:layout_margin="20dp"/>
+               android:layout_height="wrap_content">
+
+               <ImageView
+                   android:layout_width="match_parent"
+                   android:layout_height="200dp"
+                   android:layout_gravity="center"
+                   android:scaleType="centerInside"
+                   android:id="@+id/snapshot_image_view"
+                   android:background="@color/colorBlack"
+                   android:layout_margin="20dp"
+                   app:layout_constraintDimensionRatio="H,16:9"
+                   app:layout_constraintStart_toStartOf="parent"
+                   app:layout_constraintEnd_toEndOf="parent"
+                   app:layout_constraintTop_toTopOf="parent" />
+
+           </android.support.constraint.ConstraintLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp">
 
                 <Button
                     android:layout_width="wrap_content"

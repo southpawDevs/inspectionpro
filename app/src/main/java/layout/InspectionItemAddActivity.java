@@ -27,6 +27,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 
 import devs.southpaw.com.inspectionpro.R;
@@ -42,6 +43,8 @@ public class InspectionItemAddActivity extends AppCompatActivity {
     private EditText itemCondition;
     private Button createButton;
     String selectedInspectionID;
+    int itemsCount;
+    ArrayList<String> items = new ArrayList<>();
 
     ImageView item_image_view;
     Button addImage_button;
@@ -68,6 +71,8 @@ public class InspectionItemAddActivity extends AppCompatActivity {
 
         // Deserialization
         selectedInspectionID = getIntent().getStringExtra("inspection_id");
+        items = getIntent().getStringArrayListExtra("inspection_items");
+        itemsCount = items.size();
 
         Date currentDate = new Date();
 
@@ -128,7 +133,7 @@ public class InspectionItemAddActivity extends AppCompatActivity {
             FirebaseAuth auth = FirebaseAuth.getInstance();
             FirebaseUser user = auth.getCurrentUser();
 
-            InspectionItem item = new InspectionItem(title, description, method, condition, null, null, null, null, 0);
+            InspectionItem item = new InspectionItem(title, description, method, condition, null, null, null, null, 0, null);
 
             createNewItem(item);
         }
@@ -142,7 +147,7 @@ public class InspectionItemAddActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
 
-        CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
+        final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
         final CollectionReference itemsColl = inspectionsColl.document(selectedInspectionID).collection("items");
 
         itemsColl.add(object)
@@ -150,13 +155,20 @@ public class InspectionItemAddActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
 
-                        documentReference.update("inspection_item_id", documentReference.getId());
+                        String item_id = String.valueOf(documentReference.getId());
+
+                        //update item id
+                        documentReference.update("item_id", documentReference.getId());
+
+                        //add array
+                        items.add(item_id);
+                        itemsCount += 1;
+                        inspectionsColl.document(selectedInspectionID).update("inspection_items",items);
+                        inspectionsColl.document(selectedInspectionID).update("inspection_items_count",itemsCount);
 
                         Log.d("Add Firestore", "DocumentSnapshot written with ID: " + documentReference.getId());
 
                         progressBar.setVisibility(View.INVISIBLE);
-
-                        String item_id = String.valueOf(documentReference.getId());
 
                         uploadImageToStorage(documentReference, item_id);
                     }
@@ -210,7 +222,8 @@ public class InspectionItemAddActivity extends AppCompatActivity {
                 //taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
-                docRef.update("items_photo", String.valueOf(downloadUrl));
+                docRef.update("item_id", item_id);
+                docRef.update("item_photo", String.valueOf(downloadUrl));
 
                 Toast.makeText(getBaseContext(),"Item Added", Toast.LENGTH_SHORT).show();
 

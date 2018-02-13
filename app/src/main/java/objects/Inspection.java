@@ -15,10 +15,12 @@ public class Inspection{
     private Date inspection_created_at;
     private String inspection_modified_by;
     private Date inspection_modified_at;
+    private String inspection_submitted_by;
+    private Date inspection_submitted_at;
     private int inspection_status;
     private int inspection_items_count;
     private int inspection_days;
-    private ArrayList<InspectionItem> items = new ArrayList<>();
+    private ArrayList<String> inspection_items = new ArrayList<>();
 
     //add department ( marine , drilling)
 
@@ -26,9 +28,8 @@ public class Inspection{
 
     }
 
-
     //constructor
-    public Inspection(String inspectionName, Date inspection_created_at, String inspectionCreatedBy, Date inspectionModifiedAt, String inspectionModifiedBy, int inspectionStatus, int inspection_items_count, int inspection_days) {
+    public Inspection(String inspectionName, Date inspection_created_at, String inspectionCreatedBy, Date inspectionModifiedAt, String inspectionModifiedBy, String inspection_submitted_by, Date inspection_submitted_at ,int inspectionStatus, int inspection_items_count, int inspection_days) {
         this.inspection_name = inspectionName;
         this.inspection_created_at = inspection_created_at;
         this.inspection_created_by = inspectionCreatedBy;
@@ -37,6 +38,8 @@ public class Inspection{
         this.inspection_status = inspectionStatus;
         this.inspection_items_count = inspection_items_count;
         this.inspection_days = inspection_days;
+        this.inspection_submitted_at = inspection_submitted_at;
+        this.inspection_submitted_by = inspection_submitted_by;
     }
 
     //getters
@@ -60,6 +63,14 @@ public class Inspection{
         return inspection_created_at;
     }
 
+    public String getInspection_submitted_by() {
+        return inspection_submitted_by;
+    }
+
+    public Date getInspection_submitted_at() {
+        return inspection_submitted_at;
+    }
+
     public String getInspection_modified_by() {
         return inspection_modified_by;
     }
@@ -75,8 +86,8 @@ public class Inspection{
     public int getInspection_items_count(){return inspection_items_count;}
 
     //get itemArray
-    public ArrayList<InspectionItem> getInspectionItems() {
-        return items;
+    public ArrayList<String> getInspectionItems() {
+        return inspection_items;
     }
 
     //setters
@@ -94,14 +105,6 @@ public class Inspection{
 
     public void setInspection_created_at(Date inspection_created_at) {
         this.inspection_created_at = inspection_created_at;
-    }
-
-    public void  setInspection_items_count(int count){this.inspection_items_count = count;}
-
-
-    //set itemArray
-    public void setInspectionItems(ArrayList<InspectionItem> inspectionItems) {
-        this.items = inspectionItems;
     }
 
 }

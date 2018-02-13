@@ -9,9 +9,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -27,15 +29,18 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
 
     private List<InspectionItem> inspectionItemsData;
     String inspectionName;
+    String inspectionID;
 
     final private RecyclerViewAdapterForItem.RecyclerItemClickListener mOnClickListener;
+    private Context mContext;
 
     private static int viewHolderCount;
     private int mNumberItems;
 
-    public RecyclerViewAdapterForItem(List<InspectionItem> itemsData) {
+    public RecyclerViewAdapterForItem(List<InspectionItem> itemsData, Context context) {
         this.inspectionItemsData = itemsData;
         mOnClickListener = null;
+        mContext = context;
     }
 
     public interface RecyclerItemClickListener {
@@ -63,8 +68,8 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
     @Override
     public void onBindViewHolder(RecyclerViewAdapterForItem.ViewHolder holder, int position) {
         //set the title
-        holder.inspectionTitle.setText(inspectionItemsData.get(position).getItem_name());
-        holder.inspectionDescription.setText(inspectionItemsData.get(position).getItem_method());
+        holder.itemTitle.setText(inspectionItemsData.get(position).getItem_name());
+        holder.itemDescription.setText(inspectionItemsData.get(position).getItem_method());
 
         //handle status
         Log.d("item status", String.valueOf(inspectionItemsData.get(position).getItem_status()));
@@ -84,6 +89,22 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
                 holder.cardStatus.setCardBackgroundColor(Color.parseColor("#61f1a2"));
                 break;
         }
+
+        if (inspectionItemsData.get(position).getItem_condition_photo() == null){
+            holder.itemConditionImage.setVisibility(View.GONE);
+        }else{
+            holder.itemConditionImage.setVisibility(View.VISIBLE);
+            ImageView iv = holder.itemConditionImage;
+            String urlImage = inspectionItemsData.get(position).getItem_condition_photo();
+            Picasso.with(mContext).load(urlImage).into(iv);
+        }
+
+        if (inspectionItemsData.get(position).getItem_comments() == null){
+            holder.itemComments.setVisibility(View.GONE);
+        }else{
+            holder.itemComments.setVisibility(View.VISIBLE);
+            holder.itemComments.setText(inspectionItemsData.get(position).getItem_comments());
+        }
     }
 
     @Override
@@ -95,23 +116,26 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
         }
     }
 
-
     // inner class to hold a reference to each item of RecyclerView
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        public TextView inspectionTitle;
-        public TextView inspectionDescription;
-        //public TextView inspectionReady;
+        public TextView itemTitle;
+        public TextView itemDescription;
+        public ImageView itemConditionImage;
         public CardView cardStatus;
 
         private final Context context;
+
+        public TextView itemComments;
 
         public ViewHolder(View itemLayoutView) {
             super(itemLayoutView);
 
             //populate viewholder data accordingly
-            inspectionTitle = itemLayoutView.findViewById(R.id.title_item);
-            inspectionDescription = itemLayoutView.findViewById(R.id.description_item);
+            itemTitle = itemLayoutView.findViewById(R.id.title_item);
+            itemDescription = itemLayoutView.findViewById(R.id.description_item);
+            itemComments = itemLayoutView.findViewById(R.id.comments_text_View);
+            itemConditionImage = itemLayoutView.findViewById(R.id.condition_image_view);
 
             cardStatus = itemLayoutView.findViewById(R.id.status_card_view);
 
@@ -135,14 +159,16 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
             Intent intentItemDetail =  new Intent(context, ItemDetailsActivity.class);
             intentItemDetail.putExtra("selected_item" , itemJson);
             intentItemDetail.putExtra("inspection_name" , inspectionName);
+            intentItemDetail.putExtra("inspection_id" , inspectionID);
 
             //Log.d("merchant_name", inspectionItemsData.get(clickedPosition).getInspectionName());
             context.startActivity(intentItemDetail);
         }
     }
 
-    public void getInspectionNameToItemAdapter(String name){
+    public void getInspectionNameToItemAdapter(String name, String id){
         inspectionName = name;
+        inspectionID = id;
     }
 
     // Clean all elements of the recycler

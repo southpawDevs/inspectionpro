@@ -88,7 +88,7 @@ public class InspectionAddActivity extends AppCompatActivity {
             FirebaseUser user = auth.getCurrentUser();
 
             //initialize newInspection Object
-            Inspection newInspection = new Inspection(title, currentDate, user.getUid(), null, null, 0, 0, daysCount);
+            Inspection newInspection = new Inspection(title, currentDate, user.getUid(), currentDate, user.getUid(), user.getUid(), currentDate,0, 0, daysCount);
 
             Log.d("Firebase User Auth", user.getUid());
             createNewInspection(newInspection);

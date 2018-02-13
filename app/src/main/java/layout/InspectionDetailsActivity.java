@@ -2,6 +2,7 @@ package layout;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -50,6 +51,8 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
     Boolean refreshing = false;
 
+    int currentItemsCount;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +81,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_items);
         mLayoutManager = new LinearLayoutManager(this);
+        mLayoutManager.setAutoMeasureEnabled(true);
         recyclerView.setLayoutManager(mLayoutManager);
 
         ActionBar actionBar = getSupportActionBar();
@@ -89,6 +93,8 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
         Gson gson = new Gson();
         selectedInspection = gson.fromJson(inspectionJson, Inspection.class);
+
+        currentItemsCount = selectedInspection.getInspectionItems().size();
 
         //set title in action bar after deserializing data
         actionBar.setTitle(selectedInspection.getInspection_name());
@@ -128,6 +134,14 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
             case R.id.inspection_item_create:
                 Intent createIntent = new Intent(getApplicationContext(), InspectionItemAddActivity.class);
                 createIntent.putExtra("inspection_id", selectedInspection.getInspection_id());
+
+
+                ArrayList<String> ids = new ArrayList<>();
+                for(int l=0; l<=itemsData.size() - 1; l++){
+                    ids.add(itemsData.get(l).getItem_id());
+                }
+
+                createIntent.putExtra("inspection_items", ids);
                 startActivity(createIntent);
                 break;
 
@@ -158,7 +172,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         refreshContainer.setRefreshing(true);
 
         final String FireStoreTAG = "firestoreTag";
-        String selectedInspectionID = selectedInspection.getInspection_id();
+        final String selectedInspectionID = selectedInspection.getInspection_id();
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
@@ -189,8 +203,8 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 }
 
                 //handle recycler view
-                itemsAdapter = new RecyclerViewAdapterForItem(itemsData);
-                itemsAdapter.getInspectionNameToItemAdapter(selectedInspection.getInspection_name());
+                itemsAdapter = new RecyclerViewAdapterForItem(itemsData, getBaseContext());
+                itemsAdapter.getInspectionNameToItemAdapter(selectedInspection.getInspection_name(), selectedInspectionID);
                 recyclerView.setAdapter(itemsAdapter);
                 recyclerView.setItemAnimator(new DefaultItemAnimator());
 

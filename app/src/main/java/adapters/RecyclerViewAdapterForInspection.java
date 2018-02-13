@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -68,15 +69,13 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
     @Override
     public void onBindViewHolder(RecyclerViewAdapterForInspection.ViewHolder holder, int position) {
 
-        //set the title
-        holder.inspectionTitle.setText(inspectionsData.get(position).getInspection_name());
+        Inspection currentInspection = inspectionsData.get(position);
 
-        //set last modified
-        String dateString = getDateFromDate(inspectionsData.get(position).getInspection_modified_at());
-        holder.inspectionLastChecked.setText("Due in: " + dateString);
+        //set the title
+        holder.inspectionTitle.setText(currentInspection.getInspection_name());
 
         //set card background color
-        switch (inspectionsData.get(position).getInspection_status()){
+        switch (currentInspection.getInspection_status()){
             case 0:
                 //new
                 holder.cardBackground.setCardBackgroundColor(Color.parseColor("#eaeaea"));
@@ -95,7 +94,49 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
                 break;
         }
 
-        //set inspection status details
+        //set inspection due date
+        String lastChecked = "";
+        String supposeToCheck = "";
+        String today = "";
+        Double hoursRemaining = 0.0;
+        String dueInText = "";
+
+        if (currentInspection.getInspection_submitted_at() != null) {
+            Date lastCheckedDate = currentInspection.getInspection_submitted_at();
+            int inspectionDays = currentInspection.getInspection_days();
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(lastCheckedDate);
+
+            calendar.add(Calendar.DATE, inspectionDays);
+
+            Date supposeToCheckDate = new Date(calendar.getTimeInMillis());
+            Date todayDate = new Date();
+
+            //strings
+            lastChecked = getStringDateFromDate(currentInspection.getInspection_submitted_at());
+            supposeToCheck = getStringDateFromDate(supposeToCheckDate);
+            today = getStringDateFromDate(todayDate);
+
+            if (supposeToCheckDate.after(todayDate)){
+                hoursRemaining = getHoursRemaining(supposeToCheckDate);
+
+                dueInText = handleDueInText(hoursRemaining);
+
+            }else{
+
+                hoursRemaining = getHoursOverdue(supposeToCheckDate);
+                dueInText = handleOverdueByText(hoursRemaining);
+            }
+
+        }
+
+        holder.inspectionLastChecked.setText(dueInText + ", last checked: " + lastChecked);
+
+        //set item count
+        List<String> itemsArray= new ArrayList<>();
+        String totalCounts  = String.valueOf(currentInspection.getInspection_items_count());
+        holder.inspectionItemsCount.setText(totalCounts + " more items to inspect");
     }
 
     @Override
@@ -113,6 +154,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
         public TextView inspectionTitle;
         public TextView inspectionLastChecked;
         public TextView inspectionReady;
+        public TextView inspectionItemsCount;
         public CardView cardBackground;
 
         private final Context context;
@@ -125,6 +167,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
             inspectionLastChecked = itemLayoutView.findViewById(R.id.last_checked_inspection);
             inspectionReady =itemLayoutView.findViewById(R.id.ready_inspection);
             cardBackground = itemLayoutView.findViewById(R.id.card_view);
+            inspectionItemsCount = itemLayoutView.findViewById(R.id.no_items_inspection);
 
             itemLayoutView.setOnClickListener(this);
             context = itemLayoutView.getContext();
@@ -135,6 +178,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
             int clickedPosition = getAdapterPosition();
 //            mOnClickListener.onListItemClick(clickedPosition);
             Log.d("clicked", "tapped");
+            v.setClickable(false);
 
             Inspection selectedInspection = inspectionsData.get(clickedPosition);
 
@@ -149,15 +193,97 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
             Log.d("merchant_name", inspectionsData.get(clickedPosition).getInspection_name());
             context.startActivity(intentInspectionDetail);
+            v.setClickable(true);
         }
     }
 
     //helper & formatting
-    private String getDateFromDate(Date time) {
+    private String getStringDateFromDate(Date inputDate) {
         Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-        //cal.setTimeInMillis(time * 1000);
+        cal.setTime(inputDate);
+
         String date = DateFormat.format("dd-MMM-yyyy", cal).toString();
         return date;
     }
+
+    private double getHoursRemaining(Date supposeToCheck){
+
+        Date now = new Date();
+
+        double diff = supposeToCheck.getTime() - now.getTime();
+        double diffHours = diff / (60 * 60 * 1000);
+
+        return diffHours;
+    }
+
+    private double getHoursOverdue(Date supposeToCheck){
+
+        Date now = new Date();
+
+        double diff = now.getTime() - supposeToCheck.getTime();
+        double diffHours = diff / (60 * 60 * 1000);
+
+        return diffHours;
+    }
+
+    private String handleDueInText(double hoursRemaining){
+
+        String dueIn = "";
+
+        if (hoursRemaining <= 1){
+
+            double hour = Math.round(hoursRemaining);
+
+            dueIn =  dueIn.format("%.0f", hour) + " hour";
+
+        }else if(hoursRemaining < 24){
+
+            double hours = Math.round(hoursRemaining);
+
+            dueIn =  dueIn.format("%.0f", hours) + " hours";
+
+        }else{
+
+            double days = Math.round(hoursRemaining / 24);
+
+            if (days == 1){
+                dueIn = dueIn.format("%.0f", days) + " day";
+            }else{
+                dueIn = dueIn.format("%.0f", days) + " days";
+            }
+        }
+
+        return "Due in: " + dueIn;
+    }
+
+    private String handleOverdueByText(double hoursOverdue){
+
+        String overdueBy = "";
+
+        if (hoursOverdue > 24){
+
+            double days = Math.round(hoursOverdue / 24);
+
+            if (days == 1){
+                overdueBy = overdueBy.format("%.0f", days) + " day";
+            }else{
+                overdueBy = overdueBy.format("%.0f", days) + " days";
+            }
+        }else if(hoursOverdue >= 2){
+
+            double hours = Math.round(hoursOverdue);
+
+            overdueBy = overdueBy.format("%.0f", hours) + " hours";
+
+        }else if (hoursOverdue >= 1){
+
+           double hour = Math.round(hoursOverdue);
+
+            overdueBy = overdueBy.format("%.0f", hour) + " hour";
+        }
+
+        return "Overdue by: " + overdueBy;
+    }
+
 
 }
