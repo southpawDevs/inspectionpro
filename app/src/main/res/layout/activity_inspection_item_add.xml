@@ -38,16 +38,17 @@
                         android:layout_marginTop="20dp"
                         android:layout_marginRight="20dp"
                         />
+
                     <EditText
+                        android:id="@+id/item_name_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:hint="Add a title.."
-                        android:textColor="@color/colorBlack"
                         android:layout_marginLeft="18dp"
                         android:layout_marginRight="18dp"
                         android:fontFamily="@font/oxygen"
-                        android:textSize="15sp"
-                        android:id="@+id/item_name_edit_text"/>
+                        android:hint="What is the name of the title?"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="15sp" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -68,7 +69,7 @@
                         android:layout_marginLeft="18dp"
                         android:layout_marginRight="18dp"
                         android:fontFamily="@font/oxygen"
-                        android:hint="Add description"
+                        android:hint="What is this item used for?"
                         android:textColor="@color/colorBlack"
                         android:textSize="15sp"
                         android:id="@+id/item_description_edit_text"/>
@@ -92,7 +93,7 @@
                         android:layout_marginLeft="18dp"
                         android:layout_marginRight="18dp"
                         android:fontFamily="@font/oxygen"
-                        android:hint="Add method"
+                        android:hint="How is this item being secured?"
                         android:textColor="@color/colorBlack"
                         android:textSize="15sp"
                         android:id="@+id/item_method_edit_text"/>
@@ -116,10 +117,34 @@
                         android:layout_marginLeft="18dp"
                         android:layout_marginRight="18dp"
                         android:fontFamily="@font/oxygen"
-                        android:hint="Add method"
+                        android:hint="What should be checked for this item?"
                         android:textColor="@color/colorBlack"
                         android:textSize="15sp"
                         android:id="@+id/item_condition_edit_text"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Enter a question for status checking"
+                        android:fontFamily="@font/oxygen_bold"
+                        android:textSize="16sp"
+                        android:textColor="@color/colorBlack"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="20dp"
+                        />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginLeft="18dp"
+                        android:layout_marginRight="18dp"
+                        android:fontFamily="@font/oxygen"
+                        android:hint="e.g 'is the equipment adequately secured?' "
+                        android:textColor="@color/colorBlack"
+                        android:textSize="15sp"
+                        android:id="@+id/item_question_edit_text"/>
 
                     <Button
                         android:layout_width="90dp"

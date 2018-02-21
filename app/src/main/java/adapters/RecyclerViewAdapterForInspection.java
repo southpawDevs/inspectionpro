@@ -82,8 +82,8 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
                 holder.inspectionReady.setVisibility(View.GONE);
                 break;
             case 1:
-                //on the way
-                holder.cardBackground.setCardBackgroundColor(Color.parseColor("#F49A27"));
+                //alert
+                holder.cardBackground.setCardBackgroundColor(Color.parseColor("#fa4048"));
                 holder.inspectionReady.setVisibility(View.GONE);
                 break;
             case 2:
@@ -124,7 +124,8 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
                 dueInText = handleDueInText(hoursRemaining);
 
             }else{
-
+                holder.cardBackground.setCardBackgroundColor(Color.parseColor("#fa4048"));
+                holder.inspectionReady.setVisibility(View.GONE);
                 hoursRemaining = getHoursOverdue(supposeToCheckDate);
                 dueInText = handleOverdueByText(hoursRemaining);
             }

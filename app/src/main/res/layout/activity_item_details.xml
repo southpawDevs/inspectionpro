@@ -111,6 +111,13 @@
 
            </android.support.constraint.ConstraintLayout>
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status"
+                android:fontFamily="@font/oxygen"
+                android:gravity="center"
+                android:layout_margin="10dp"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
@@ -120,20 +127,12 @@
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="ORANGE"
-                    android:background="@color/colorStatusOrange"
+                    android:text="GREY"
+                    android:background="@color/colorStatusGrey"
                     android:layout_weight="1"
                     android:textColor="@color/colorPrimaryWhite"
-                    android:fontFamily="@font/oxygen_bold"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="GREEN"
-                    android:background="@color/colorStatusGreen"
-                    android:layout_weight="1"
-                    android:textColor="@color/colorPrimaryWhite"
-                    android:fontFamily="@font/oxygen_bold"/>
+                    android:fontFamily="@font/oxygen_bold"
+                    android:id="@+id/item_status_0"/>
 
                 <Button
                     android:layout_width="wrap_content"
@@ -142,9 +141,18 @@
                     android:background="@color/colorStatusRed"
                     android:layout_weight="1"
                     android:textColor="@color/colorPrimaryWhite"
-                    android:fontFamily="@font/oxygen_bold"/>
+                    android:fontFamily="@font/oxygen_bold"
+                    android:id="@+id/item_status_1"/>
 
-
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="GREEN"
+                    android:background="@color/colorStatusGreen"
+                    android:layout_weight="1"
+                    android:textColor="@color/colorPrimaryWhite"
+                    android:fontFamily="@font/oxygen_bold"
+                    android:id="@+id/item_status_2"/>
 
             </LinearLayout>
         </LinearLayout>

@@ -80,8 +80,8 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
                 holder.cardStatus.setCardBackgroundColor(Color.parseColor("#eaeaea"));
                 break;
             case 1:
-                //on the way
-                holder.cardStatus.setCardBackgroundColor(Color.parseColor("#F49A27"));
+                //alert
+                holder.cardStatus.setCardBackgroundColor(Color.parseColor("#fa4048"));
 
                 break;
             case 2:

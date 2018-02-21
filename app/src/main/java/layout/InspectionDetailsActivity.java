@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -20,11 +21,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 
@@ -145,6 +150,18 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 startActivity(createIntent);
                 break;
 
+            case R.id.inspection_delete:
+
+                //delete inspection here
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+
+                final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
+
+                deleteInspection(inspectionsColl, selectedInspection.getInspection_id());
+
+                break;
+
             case android.R.id.home:
                 Log.d("clicked", "action bar clicked");
                 finish();
@@ -177,7 +194,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
 
-        CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
+        final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
         CollectionReference itemsColl = inspectionsColl.document(selectedInspectionID).collection("items");
 
         final List<InspectionItem> items = new ArrayList<>();
@@ -208,6 +225,8 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 recyclerView.setAdapter(itemsAdapter);
                 recyclerView.setItemAnimator(new DefaultItemAnimator());
 
+                addSnapshotListener(inspectionsColl.document(selectedInspectionID));
+
                 handleItemCompletion(itemsData);
 
                 refreshContainer.setRefreshing(false);
@@ -218,9 +237,58 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 }else{
 
                 }
-
-
             }
         });
     }
+
+    private void addSnapshotListener(DocumentReference docRef){
+        //for realtime changes
+
+        docRef.collection("items")
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w("Realtime Firestore", "Listen failed.", e);
+                            return;
+                        }
+
+                        itemsData.clear();
+
+                        List<InspectionItem> items = new ArrayList<>();
+                        for (DocumentSnapshot doc : value) {
+                            if (doc.get("item_name") != null) {
+                                InspectionItem item = doc.toObject(InspectionItem.class);
+                                itemsData.add(item);
+                                itemsAdapter.notifyDataSetChanged();
+                            }
+                        }
+
+                    }
+                });
+    }
+
+    private void deleteInspection(CollectionReference colRef, String inspectioniD){
+        colRef.document(inspectioniD)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("Firestore inspection", "DocumentSnapshot successfully deleted!");
+                        Toast.makeText(getBaseContext(), "Inspection Deleted", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("Firestore inspection", "Error deleting document", e);
+                        Toast.makeText(getBaseContext(), "Fail to delete inspection", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+
+    }
+
 }

@@ -85,7 +85,7 @@
                     android:layout_weight="1"
                     android:backgroundTint="@color/colorPrimaryDark"
                     android:fontFamily="@font/oxygen"
-                    android:text="CHECK"
+                    android:text="Status"
                     android:textColor="@color/colorPrimaryWhite"
                     android:layout_marginRight="15dp"/>
 

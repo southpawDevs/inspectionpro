@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -64,6 +65,11 @@ public class ItemDetailsActivity extends AppCompatActivity {
     String inspectionName;
     String inspectionID;
     private  ImageView itemImageView;
+
+    private Button itemStatus0;
+    private Button itemStatus1;
+    private Button itemStatus2;
+
 
     private int REQUEST_CODE = 1880;
 
@@ -161,6 +167,10 @@ public class ItemDetailsActivity extends AppCompatActivity {
         itemImageView = (ImageView) findViewById(R.id.item_image_view);
         updateCommentButton = (Button) findViewById(R.id.update_comment_button);
 
+        itemStatus0 = (Button) findViewById(R.id.item_status_0);
+        itemStatus1 = (Button) findViewById(R.id.item_status_1);
+        itemStatus2 = (Button) findViewById(R.id.item_status_2);
+
         snapshotImageView.setVisibility(View.GONE);
 
         // Deserialization
@@ -205,6 +215,67 @@ public class ItemDetailsActivity extends AppCompatActivity {
             }
         });
 
+        itemStatus0.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateStatusToFirebase(selectedItem.getItem_id(), 0);
+            }
+        });
+
+        itemStatus1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateStatusToFirebase(selectedItem.getItem_id(), 1);
+            }
+        });
+
+        itemStatus2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateStatusToFirebase(selectedItem.getItem_id(), 2);
+            }
+        });
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.items_detail_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+
+        switch (id) {
+            // action with ID action_refresh was selected
+            case R.id.inspection_item_delete:
+
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+                DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+
+                final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
+                final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
+
+                deleteInspectionItem(itemsColl, selectedItem.getItem_id());
+
+                break;
+
+            case R.id.inspection_item_edit:
+
+                //edit item here
+
+                break;
+
+            case android.R.id.home:
+                Log.d("clicked", "action bar clicked");
+                finish();
+        }
+
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -215,22 +286,6 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
            setPic();
         }
-    }
-
-    //handle back button
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        if (id == android.R.id.home) {
-            Log.d("clicked", "action bar clicked");
-            finish();
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     void populateScreenData(){
@@ -256,6 +311,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
         if (conditionImageUrl != "" || conditionImageUrl != null){
             Picasso.with(this).load(conditionImageUrl).into(snapshotImageView);
             snapshotImageView.setVisibility(View.VISIBLE);
+        }else{
+            snapshotImageView.setVisibility(View.GONE);
         }
     }
 
@@ -343,6 +400,54 @@ public class ItemDetailsActivity extends AppCompatActivity {
         }else{
             Toast.makeText(this, "please fill in comments", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void updateStatusToFirebase(String item_id, int status){
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+        CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
+        final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
+
+        //update firestore
+        itemsColl.document(item_id).update("item_status", status)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        hideKeyboard();
+                        itemComments.clearFocus();
+                        Toast.makeText(getBaseContext(), "status updated", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        itemComments.clearFocus();
+                        hideKeyboard();
+                        Toast.makeText(getBaseContext(), "fail to update status", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void deleteInspectionItem(CollectionReference colRef, String itemID){
+        colRef.document(itemID)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("Firestore inspection", "DocumentSnapshot successfully deleted!");
+                        Toast.makeText(getBaseContext(), "Item deleted", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("Firestore inspection", "Error deleting document", e);
+                        Toast.makeText(getBaseContext(), "Fail to delete item", Toast.LENGTH_SHORT).show();
+
+                    }
+                });
 
     }
 

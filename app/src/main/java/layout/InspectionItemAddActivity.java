@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,6 +43,8 @@ public class InspectionItemAddActivity extends AppCompatActivity {
     private EditText itemDescription;
     private EditText itemMethod;
     private EditText itemCondition;
+    private EditText itemQuestion;
+
     private Button createButton;
     String selectedInspectionID;
     int itemsCount;
@@ -61,6 +65,7 @@ public class InspectionItemAddActivity extends AppCompatActivity {
         itemDescription = (EditText) findViewById(R.id.item_description_edit_text);
         itemMethod = (EditText) findViewById(R.id.item_method_edit_text);
         itemCondition = (EditText) findViewById(R.id.item_condition_edit_text);
+        itemQuestion = (EditText) findViewById(R.id.item_question_edit_text);
         createButton = (Button) findViewById(R.id.item_create_button);
         addImage_button = (Button) findViewById(R.id.item_add_image_button);
         item_image_view = (ImageView) findViewById(R.id.item_image_view);
@@ -110,22 +115,32 @@ public class InspectionItemAddActivity extends AppCompatActivity {
         }
     }
 
+
     private void handleConditionsToCreateInspectionItem(){
         String title = itemName.getText().toString();
         String description = itemDescription.getText().toString();
         String method = itemMethod.getText().toString();
         String condition = itemCondition.getText().toString();
+        String question = itemQuestion.getText().toString();
 
         if (TextUtils.isEmpty(title)){
             Toast.makeText(getBaseContext(),"Please fill in title", Toast.LENGTH_SHORT).show();
+            createButton.setClickable(true);
         }else if (TextUtils.isEmpty(description)){
             Toast.makeText(getBaseContext(),"Please fill in description", Toast.LENGTH_SHORT).show();
+            createButton.setClickable(true);
         }else if (TextUtils.isEmpty(method)){
             Toast.makeText(getBaseContext(),"Please fill in method", Toast.LENGTH_SHORT).show();
+            createButton.setClickable(true);
         }else if (TextUtils.isEmpty(condition)){
             Toast.makeText(getBaseContext(),"Please fill in condition", Toast.LENGTH_SHORT).show();
+            createButton.setClickable(true);
+        }else if (TextUtils.isEmpty(question)){
+            Toast.makeText(getBaseContext(),"Please fill in question", Toast.LENGTH_SHORT).show();
+            createButton.setClickable(true);
         }else if (item_image_view.getDrawable() == null){
             Toast.makeText(getBaseContext(),"Please add an image", Toast.LENGTH_SHORT).show();
+            createButton.setClickable(true);
         }else{
 
             Date currentDate = new Date();
@@ -133,7 +148,7 @@ public class InspectionItemAddActivity extends AppCompatActivity {
             FirebaseAuth auth = FirebaseAuth.getInstance();
             FirebaseUser user = auth.getCurrentUser();
 
-            InspectionItem item = new InspectionItem(title, description, method, condition, null, null, null, null, 0, null);
+            InspectionItem item = new InspectionItem(title, description, method, condition, null, null, null, null, 0, null,question);
 
             createNewItem(item);
         }
@@ -168,7 +183,7 @@ public class InspectionItemAddActivity extends AppCompatActivity {
 
                         Log.d("Add Firestore", "DocumentSnapshot written with ID: " + documentReference.getId());
 
-                        progressBar.setVisibility(View.INVISIBLE);
+                        //progressBar.setVisibility(View.INVISIBLE);
 
                         uploadImageToStorage(documentReference, item_id);
                     }

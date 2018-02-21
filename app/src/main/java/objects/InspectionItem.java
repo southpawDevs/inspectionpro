@@ -17,6 +17,7 @@ public class InspectionItem {
     private String item_photo;
     private String item_condition;
     private String item_comments;
+    private String item_check_question;
     private Date item_modified_at;
     private String item_modified_by;
     private int item_status;
@@ -28,7 +29,7 @@ public class InspectionItem {
     }
 
     //constructor
-    public InspectionItem(String itemName, String itemDescription, String itemMethod, String itemCondition, String itemPhoto, String itemComments, Date itemModifiedAt, String itemModifiedBy, int itemStatus, String itemConditionPhoto) {
+    public InspectionItem(String itemName, String itemDescription, String itemMethod, String itemCondition, String itemPhoto, String itemComments, Date itemModifiedAt, String itemModifiedBy, int itemStatus, String itemConditionPhoto, String itemCheckQuestion) {
         this.item_name = itemName;
         this.item_description = itemDescription;
         this.item_method = itemMethod;
@@ -39,6 +40,7 @@ public class InspectionItem {
         this.item_modified_by = itemModifiedBy;
         this.item_status = itemStatus;
         this.item_condition_photo = itemConditionPhoto;
+        this.item_check_question = itemCheckQuestion;
     }
 
     //getters
@@ -83,6 +85,9 @@ public class InspectionItem {
     }
 
     public String getItem_condition_photo(){return  item_condition_photo;}
+
+    public String getItem_check_question(){return  item_check_question;}
+
 
     //setters
     public void setItem_name(String itemName) {
