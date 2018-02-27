@@ -6,6 +6,7 @@
     <color name="colorPrimaryWhite">#FFFFFF</color>
     <color name="colorBlack">#333333</color>
     <color name="colorStatusGreen">#61f1a2</color>
+    <color name="colorStatusDarkGreen">#1e914b</color>
     <color name="colorStatusGrey">#eaeaea</color>
     <color name="colorStatusRed">#fa4048</color>
     <color name="colorStatusOrange">#F49A27</color>

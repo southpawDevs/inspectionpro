@@ -25,7 +25,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/title_inspection"
+                android:id="@+id/title_inspection_archive"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"
@@ -40,7 +40,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/last_checked_inspection"
+                android:id="@+id/last_checked_inspection_archive"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="3dp"
@@ -48,33 +48,6 @@
                 android:layout_marginRight="20dp"
                 android:fontFamily="@font/oxygen_light"
                 android:text="@string/title_archives"
-                android:textAlignment="textStart"
-                android:textColor="@color/colorPrimaryWhite"
-                android:textSize="14sp"
-                android:textStyle="normal" />
-
-            <TextView
-                android:id="@+id/no_items_inspection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:fontFamily="@font/oxygen_light"
-                android:text="10 more items to inspect"
-                android:textAlignment="textStart"
-                android:textColor="@color/colorPrimaryWhite"
-                android:textSize="14sp"
-                android:textStyle="normal" />
-
-            <TextView
-                android:id="@+id/ready_inspection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:fontFamily="@font/oxygen_bold"
                 android:textAlignment="textStart"
                 android:textColor="@color/colorPrimaryWhite"
                 android:textSize="14sp"

@@ -48,7 +48,8 @@
                         android:fontFamily="@font/oxygen"
                         android:hint="What is the name of the title?"
                         android:textColor="@color/colorBlack"
-                        android:textSize="15sp" />
+                        android:textSize="15sp"
+                        android:inputType="textCapSentences"/>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -72,7 +73,8 @@
                         android:hint="What is this item used for?"
                         android:textColor="@color/colorBlack"
                         android:textSize="15sp"
-                        android:id="@+id/item_description_edit_text"/>
+                        android:id="@+id/item_description_edit_text"
+                        android:inputType="textCapSentences"/>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -96,7 +98,8 @@
                         android:hint="How is this item being secured?"
                         android:textColor="@color/colorBlack"
                         android:textSize="15sp"
-                        android:id="@+id/item_method_edit_text"/>
+                        android:id="@+id/item_method_edit_text"
+                        android:inputType="textCapSentences"/>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -120,7 +123,8 @@
                         android:hint="What should be checked for this item?"
                         android:textColor="@color/colorBlack"
                         android:textSize="15sp"
-                        android:id="@+id/item_condition_edit_text"/>
+                        android:id="@+id/item_condition_edit_text"
+                        android:inputType="textCapSentences"/>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -144,7 +148,8 @@
                         android:hint="e.g 'is the equipment adequately secured?' "
                         android:textColor="@color/colorBlack"
                         android:textSize="15sp"
-                        android:id="@+id/item_question_edit_text"/>
+                        android:id="@+id/item_question_edit_text"
+                        android:inputType="textCapSentences"/>
 
                     <Button
                         android:layout_width="90dp"

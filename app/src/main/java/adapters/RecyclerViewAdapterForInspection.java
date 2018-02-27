@@ -78,12 +78,12 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
         switch (currentInspection.getInspection_status()){
             case 0:
                 //new
-                holder.cardBackground.setCardBackgroundColor(Color.parseColor("#eaeaea"));
+                holder.cardBackground.setCardBackgroundColor(Color.parseColor("#f7f7f7"));
                 holder.inspectionReady.setVisibility(View.GONE);
                 break;
             case 1:
                 //alert
-                holder.cardBackground.setCardBackgroundColor(Color.parseColor("#fa4048"));
+                //holder.cardBackground.setCardBackgroundColor(Color.parseColor("#fa4048"));
                 holder.inspectionReady.setVisibility(View.GONE);
                 break;
             case 2:
@@ -122,10 +122,16 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
                 hoursRemaining = getHoursRemaining(supposeToCheckDate);
 
                 dueInText = handleDueInText(hoursRemaining);
-
+                holder.inspectionTitle.setTextColor(R.color.colorBlack);
+                holder.inspectionLastChecked.setTextColor(R.color.colorBlack);
+                holder.inspectionItemsCount.setTextColor(R.color.colorBlack);
             }else{
                 holder.cardBackground.setCardBackgroundColor(Color.parseColor("#fa4048"));
                 holder.inspectionReady.setVisibility(View.GONE);
+
+//                holder.inspectionTitle.setTextColor(R.color.colorPrimaryWhite);
+//                holder.inspectionLastChecked.setTextColor(R.color.colorPrimaryWhite);
+//                holder.inspectionItemsCount.setTextColor(R.color.colorPrimaryWhite);
                 hoursRemaining = getHoursOverdue(supposeToCheckDate);
                 dueInText = handleOverdueByText(hoursRemaining);
             }
@@ -176,6 +182,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
         @Override
         public void onClick(View v) {
+
             int clickedPosition = getAdapterPosition();
 //            mOnClickListener.onListItemClick(clickedPosition);
             Log.d("clicked", "tapped");
@@ -192,9 +199,8 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
             intentInspectionDetail.putExtra(InspectionDetailsActivity.EXTRA_NAME , inspectionsData.get(clickedPosition).getInspection_name());
             intentInspectionDetail.putExtra("inspection", inspectionJson);
 
-            Log.d("merchant_name", inspectionsData.get(clickedPosition).getInspection_name());
+            Log.d("inspection data", inspectionsData.get(clickedPosition).getInspection_name());
             context.startActivity(intentInspectionDetail);
-            v.setClickable(true);
         }
     }
 

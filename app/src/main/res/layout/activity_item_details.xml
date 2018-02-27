@@ -30,32 +30,43 @@
                 android:scaleType="centerInside"/>
 
             <TextView
-                android:id="@+id/item_description"
+                android:id="@+id/item_title_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
-                android:fontFamily="@font/oxygen"
-                android:text="inspection detail"
+                android:fontFamily="@font/oxygen_bold"
+                android:text="Name"
                 android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/item_description"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:fontFamily="@font/oxygen"
+                android:text="inspection description"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/item_method"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:fontFamily="@font/oxygen"
-                android:text="inspection detail"
-                android:textSize="18sp" />
+                android:text="inspection method"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/item_condition"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:fontFamily="@font/oxygen"
-                android:text="inspection detail"
-                android:textSize="18sp" />
-
+                android:text="inspection condition"
+                android:textSize="16sp" />
 
             <android.support.v7.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
@@ -70,17 +81,18 @@
                     android:hint="add comment.."
                     android:layout_weight="3"
                     android:id="@+id/item_comment_edit_text"
-                    android:imeOptions="actionDone"/>
+                    android:imeOptions="actionDone"
+                    android:textSize="16sp"/>
 
                 <Button
                     android:layout_width="80dp"
                     android:layout_height="50dp"
                     android:layout_gravity="center"
+                    android:layout_marginRight="10dp"
                     android:text="SEND"
                     android:id="@+id/update_comment_button"/>
 
             </android.support.v7.widget.LinearLayoutCompat>
-
 
             <Button
                 android:layout_width="match_parent"
@@ -95,6 +107,7 @@
            <android.support.constraint.ConstraintLayout
                android:layout_width="match_parent"
                android:layout_height="wrap_content">
+
 
                <ImageView
                    android:layout_width="match_parent"
@@ -112,17 +125,22 @@
            </android.support.constraint.ConstraintLayout>
 
             <TextView
+                android:id="@+id/item_question_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Status"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/oxygen"
                 android:gravity="center"
-                android:layout_margin="10dp"/>
+                android:text="Status Question"
+                android:textStyle="italic" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
                 android:orientation="horizontal"
-                android:layout_marginTop="20dp">
+                android:layout_marginTop="5dp">
 
                 <Button
                     android:layout_width="wrap_content"
@@ -156,7 +174,6 @@
 
             </LinearLayout>
         </LinearLayout>
-
     </ScrollView>
 
 </android.support.constraint.ConstraintLayout>

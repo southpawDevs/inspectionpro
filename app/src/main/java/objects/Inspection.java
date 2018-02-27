@@ -107,4 +107,12 @@ public class Inspection{
         this.inspection_created_at = inspection_created_at;
     }
 
+    public void setInspection_submitted_at(Date inspection_submitted_at) {
+        this.inspection_submitted_at = inspection_submitted_at;
+    }
+
+    public void setInspection_submitted_by(String inspection_submitted_by) {
+        this.inspection_submitted_by = inspection_submitted_by;
+    }
+
 }

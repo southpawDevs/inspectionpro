@@ -1,8 +1,6 @@
 package layout;
 
-import android.content.Context;
 import android.content.Intent;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,11 +10,12 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.AttributeSet;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +23,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -34,7 +35,10 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import devs.southpaw.com.inspectionpro.R;
 import adapters.RecyclerViewAdapterForItem;
@@ -51,12 +55,17 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
     private LinearLayoutManager mLayoutManager;
     private RecyclerViewAdapterForItem itemsAdapter;
     private SwipeRefreshLayout refreshContainer;
+    private Button submitInspectionButton;
     RecyclerView recyclerView;
     TextView completedCount;
 
     Boolean refreshing = false;
 
-    int currentItemsCount;
+    private int currentItemsCount;
+    private int completedItemsCount = 0;
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +73,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         setContentView(R.layout.activity_inspection_details);
 
         completedCount = (TextView) findViewById(R.id.count_text_view);
+        submitInspectionButton = (Button) findViewById(R.id.submit_inspection_button);
 
         //handle pull refreshing container
         refreshContainer = (SwipeRefreshLayout) findViewById(R.id.refresh_container_detail);
@@ -83,11 +93,29 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
+        //swipe to delete
+//        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+//            @Override
+//            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+//                return false;
+//            }
+//
+//            // [...]
+//            @Override
+//            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+//                //Remove swiped item from list and notify the RecyclerView
+//            }
+//        };
+//
+//        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_items);
         mLayoutManager = new LinearLayoutManager(this);
         mLayoutManager.setAutoMeasureEnabled(true);
         recyclerView.setLayoutManager(mLayoutManager);
+
+        //itemTouchHelper.attachToRecyclerView(recyclerView);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -99,10 +127,15 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         Gson gson = new Gson();
         selectedInspection = gson.fromJson(inspectionJson, Inspection.class);
 
-        currentItemsCount = selectedInspection.getInspectionItems().size();
-
         //set title in action bar after deserializing data
         actionBar.setTitle(selectedInspection.getInspection_name());
+
+        submitInspectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                submitInspection(completedItemsCount, currentItemsCount);
+            }
+        });
     }
 
     @Override
@@ -153,11 +186,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
             case R.id.inspection_delete:
 
                 //delete inspection here
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
-
                 final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
-
                 deleteInspection(inspectionsColl, selectedInspection.getInspection_id());
 
                 break;
@@ -175,12 +204,14 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         int itemsCompletedCount = 0;
         for(int l=0; l<items.size(); l++){
 
-            if (items.get(l).getItem_status() == 2){
+            if (items.get(l).getItem_status() != 0){
                 itemsCompletedCount += 1;
             }//end if
         }//end loop
 
-        completedCount.setText(String.valueOf(itemsCompletedCount) + "/" + String.valueOf(items.size()) + " completed");
+        completedCount.setText(String.valueOf(itemsCompletedCount) + "/" + String.valueOf(items.size()) + " inspected");
+        completedItemsCount = itemsCompletedCount;
+        currentItemsCount = items.size();
     }
 
 
@@ -190,9 +221,6 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
         final String FireStoreTAG = "firestoreTag";
         final String selectedInspectionID = selectedInspection.getInspection_id();
-
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
 
         final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
         CollectionReference itemsColl = inspectionsColl.document(selectedInspectionID).collection("items");
@@ -265,6 +293,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                             }
                         }
 
+                        handleItemCompletion(itemsData);
                     }
                 });
     }
@@ -290,5 +319,82 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 });
 
     }
+
+    private void submitInspection(int completedCount, int totalCount){
+
+        if (completedCount == totalCount){
+            //Toast.makeText(getBaseContext(), "Inspection submitted succesfully(no_func_yet)", Toast.LENGTH_SHORT).show();
+
+            FirebaseAuth auth = FirebaseAuth.getInstance();
+            FirebaseUser user = auth.getCurrentUser();
+
+            Inspection archive = new Inspection();
+            archive = selectedInspection;
+            archive.setInspection_submitted_at(new Date());
+            archive.setInspection_created_by(user.getUid());
+
+            createInspectionArchive(archive, archive.getInspection_submitted_at(), user.getUid());
+        }else{
+            Toast.makeText(getBaseContext(), "Please inspect the remaining items", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void createInspectionArchive(Inspection archiveInspection, final Date newDate, final String uid){
+        final String selectedInspectionID = selectedInspection.getInspection_id();
+        final CollectionReference archiveColl = devHousePropertyDoc.collection("archives");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("inspection_name", archiveInspection.getInspection_name());
+
+        archiveColl.document(selectedInspectionID).set(data);
+        archiveColl.document(selectedInspectionID).collection("inspected_history").add(archiveInspection)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+
+                        //re-add firebase auto id to field
+                        documentReference.update("inspection_id", documentReference.getId());
+
+                        Log.d("Add Firestore", "DocumentSnapshot written with ID: " + documentReference.getId());
+
+                        //progressBar.setVisibility(View.INVISIBLE);
+
+                        //refresh current inspection
+                        final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
+                        CollectionReference itemsColl = inspectionsColl.document(selectedInspectionID).collection("items");
+                        inspectionsColl.document(selectedInspectionID).update(
+
+                                "inspection_submitted_at", newDate,
+                                "inspection_submitted_by", uid
+
+                        );
+
+                        for(int l=0; l<=itemsData.size()-1; l++){
+                            String currentItemID = itemsData.get(l).getItem_id();
+
+                            itemsColl.document(currentItemID).update(
+                                    "item_status", 0,
+                                "item_condition_photo", null
+
+                            );
+
+                            Toast.makeText(getBaseContext(),"Inspection Submitted", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        Log.w("Add Firestore", "Error adding document", e);
+
+                        Toast.makeText(getBaseContext(),"Fail to archived inspection", Toast.LENGTH_SHORT).show();
+
+                        //progressBar.setVisibility(View.INVISIBLE);
+                    }
+                });
+    }
+
 
 }

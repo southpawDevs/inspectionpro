@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -38,7 +39,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
-import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -54,10 +54,12 @@ import objects.InspectionItem;
 
 public class ItemDetailsActivity extends AppCompatActivity {
 
+    private TextView itemTitle;
     private TextView itemDescription;
     private TextView itemCondition;
     private TextView itemMethod;
     private EditText itemComments;
+    private TextView itemQuestion;
     private Button addConditionImageButton;
     private Button updateCommentButton;
     private ImageView snapshotImageView;
@@ -158,10 +160,12 @@ public class ItemDetailsActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        itemTitle = (TextView) findViewById(R.id.item_title_text_view);
         itemDescription = (TextView) findViewById(R.id.item_description);
         itemMethod = (TextView) findViewById(R.id.item_method);
         itemCondition = (TextView) findViewById(R.id.item_condition);
         itemComments = (EditText) findViewById(R.id.item_comment_edit_text);
+        itemQuestion = (TextView) findViewById(R.id.item_question_text_view);
         addConditionImageButton = (Button) findViewById(R.id.add_condition_image_button);
         snapshotImageView = (ImageView) findViewById(R.id.snapshot_image_view);
         itemImageView = (ImageView) findViewById(R.id.item_image_view);
@@ -294,22 +298,25 @@ public class ItemDetailsActivity extends AppCompatActivity {
         String method = selectedItem.getItem_method();
         String condition = selectedItem.getItem_condition();
         String comment = selectedItem.getItem_comments();
+        String question = selectedItem.getItem_check_question();
 
-        itemDescription.setText("Title: " + description);
-        itemMethod.setText("Method: " + method);
+        itemTitle.setText(name);
+        itemDescription.setText("-" + description);
+        itemMethod.setText("-" + method);
         itemCondition.setText("Condition: " + condition);
         itemComments.setText(comment);
+        itemQuestion.setText(question);
 
         String urlImage = selectedItem.getItem_photo();
 
         if (urlImage != "" || urlImage != null){
-            Picasso.with(this).load(urlImage).into(itemImageView);
+            Glide.with(this).load(urlImage).fitCenter().into(itemImageView);
         }
 
         String conditionImageUrl = selectedItem.getItem_condition_photo();
 
         if (conditionImageUrl != "" || conditionImageUrl != null){
-            Picasso.with(this).load(conditionImageUrl).into(snapshotImageView);
+            Glide.with(this).load(conditionImageUrl).fitCenter().into(snapshotImageView);
             snapshotImageView.setVisibility(View.VISIBLE);
         }else{
             snapshotImageView.setVisibility(View.GONE);
@@ -324,7 +331,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
         // Create a child reference
         // imagesRef now points to "images"
-        StorageReference imagesItemRef = storageRef.child("oNJZmUlwxGxAymdyKoIV").child("images").child("temp");
+        StorageReference imagesItemRef = storageRef.child("oNJZmUlwxGxAymdyKoIV").child("images").child("temp_"+item_id);
 
 
         Uri file = Uri.fromFile(new File(mCurrentPhotoPath));

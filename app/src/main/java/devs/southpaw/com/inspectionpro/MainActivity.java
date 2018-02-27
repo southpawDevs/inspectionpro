@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DrawableRes;
@@ -51,10 +52,12 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import java.util.Arrays;
 import java.util.List;
 
+import devs.southpaw.com.inspectionpro.actionItemsLayout.ActionItemsFragment;
+import devs.southpaw.com.inspectionpro.archiveLayout.ArchiveFragment;
 import layout.InspectionAddActivity;
 import layout.InspectionFragment;
 
-public class MainActivity extends AppCompatActivity implements InspectionFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements InspectionFragment.OnFragmentInteractionListener, ArchiveFragment.OnFragmentInteractionListener, ActionItemsFragment.OnFragmentInteractionListener{
 
     private int mSelectedItem;
     private BottomNavigationView mBottomNav;
@@ -71,9 +74,11 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                     selectFragment(item);
                     return true;
                 case R.id.navigation_action:
-                    break;
+                    selectFragment(item);
+                    return true;
                 case R.id.navigation_archives:
-                    break;
+                    selectFragment(item);
+                    return true;
             }
             return false;
         }
@@ -145,10 +150,10 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                 frag = InspectionFragment.newInstance("title", "inspection");
                 break;
             case R.id.navigation_action:
-                frag = InspectionFragment.newInstance("title", "action");
+                frag = ActionItemsFragment.newInstance("title", "action");
                 break;
             case R.id.navigation_archives:
-                frag = InspectionFragment.newInstance("title", "archives");
+                frag = ArchiveFragment.newInstance("title", "archives");
                 break;
         }
 
@@ -184,8 +189,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         FirebaseUser user = auth.getCurrentUser();
 
         //if you want to update the items at a later time it is recommended to keep it in a variable
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("HOME").withIconColorRes(R.color.colorPrimaryDark);
-        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("SETTINGS");
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Welcome back").withIconColorRes(R.color.colorPrimaryDark);
 
         // Create the AccountHeader
         AccountHeader headerResult = new AccountHeaderBuilder()
@@ -212,10 +216,9 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                 .addDrawerItems(
                         item1,
                         new DividerDrawerItem(),
-                        item2,
                         new SecondaryDrawerItem().withName("ACCOUNT"),
                         new DividerDrawerItem(),
-                        new SecondaryDrawerItem().withName("Log Out")
+                        new SecondaryDrawerItem().withName("Log Out").withIconColorRes(R.color.colorBlack)
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
@@ -240,8 +243,8 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         //result.updateName(1, "A name");
 
         //the result object also allows you to add new items, remove items, add footer, sticky footer, ..
-        result.addItem(new DividerDrawerItem());
-        result.addStickyFooterItem(new PrimaryDrawerItem().withName("Switch to admin"));
+//        result.addItem(new DividerDrawerItem());
+//        result.addStickyFooterItem(new PrimaryDrawerItem().withName("Switch to admin"));
 
     }
 
