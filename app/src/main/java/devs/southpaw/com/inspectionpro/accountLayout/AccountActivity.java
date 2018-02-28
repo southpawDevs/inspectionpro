@@ -1,14 +1,17 @@
 package devs.southpaw.com.inspectionpro.accountLayout;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -26,6 +29,7 @@ import devs.southpaw.com.inspectionpro.SplashScreenActivity;
 public class AccountActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
+    private ImageView profilePic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +38,16 @@ public class AccountActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar_account);
         handleNavigationDrawer();
+
+        toolbar.setTitle("Account");
+
+        profilePic = (ImageView) findViewById(R.id.profile_image);
+
+        IconicsDrawable profileDrawable = new IconicsDrawable(this)
+                .icon(GoogleMaterial.Icon.gmd_person)
+                .color(Color.WHITE)
+                .sizeDp(24);
+        profilePic.setImageDrawable(profileDrawable);
     }
 
     private void handleNavigationDrawer(){
