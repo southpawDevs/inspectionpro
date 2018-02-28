@@ -62,7 +62,6 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshContainer;
 
-    private List<Inspection> inspectionsData = new ArrayList<>();
 
     private Boolean refreshing = false;
 

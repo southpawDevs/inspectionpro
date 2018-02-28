@@ -3,6 +3,7 @@ package adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
@@ -24,6 +25,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.view.IconicsImageView;
 
 import java.util.List;
 
@@ -153,6 +157,7 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
         public SwipeRevealLayout swipeRevealLayout;
         private View frontLayout;
         private View doneLayout;
+        private IconicsImageView doneIV;
 
         private final Context context;
 
@@ -169,9 +174,15 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
             itemDescription = itemLayoutView.findViewById(R.id.description_item);
             itemComments = itemLayoutView.findViewById(R.id.comments_text_View);
             itemConditionImage = itemLayoutView.findViewById(R.id.condition_image_view);
-
+            doneIV = itemLayoutView.findViewById(R.id.done_image_view);
             cardStatus = itemLayoutView.findViewById(R.id.status_card_view);
 
+            IconicsDrawable drawable = new IconicsDrawable(mContext)
+                    .icon(GoogleMaterial.Icon.gmd_done)
+                    .color(Color.WHITE)
+                    .sizeDp(24);
+
+            doneIV.setIcon(drawable);
             itemLayoutView.setOnClickListener(this);
             context = itemLayoutView.getContext();
 

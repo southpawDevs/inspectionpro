@@ -4,14 +4,16 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-feature android:name="android.hardware.camera"
+
+    <uses-feature
+        android:name="android.hardware.camera"
         android:required="true" />
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -43,7 +45,7 @@
 
         <activity android:name="layout.ItemDetailsActivity" />
         <activity android:name="layout.InspectionAddActivity" />
-        <activity android:name="layout.InspectionItemAddActivity"></activity>
+        <activity android:name="layout.InspectionItemAddActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -52,9 +54,13 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths"></meta-data>
+                android:resource="@xml/file_paths" />
         </provider>
 
+        <activity android:name=".archiveLayout.ArchiveItemsActivity" />
+
+        <activity android:name=".accountLayout.AccountActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

@@ -23,10 +23,11 @@
             android:layout_gravity="center"
             android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                app:srcCompat="@android:drawable/checkbox_on_background" />
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center"
+                android:id="@+id/done_image_view"/>
 
             <TextView
                 android:layout_width="match_parent"

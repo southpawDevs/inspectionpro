@@ -17,6 +17,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.LayoutInflaterCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -37,6 +38,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.Iconics;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.context.IconicsLayoutInflater2;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -52,6 +57,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import java.util.Arrays;
 import java.util.List;
 
+import devs.southpaw.com.inspectionpro.accountLayout.AccountActivity;
 import devs.southpaw.com.inspectionpro.actionItemsLayout.ActionItemsFragment;
 import devs.southpaw.com.inspectionpro.archiveLayout.ArchiveFragment;
 import layout.InspectionAddActivity;
@@ -94,8 +100,11 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        LayoutInflaterCompat.setFactory2(getLayoutInflater(), new IconicsLayoutInflater2(getDelegate()));
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
 
         mBottomNav = (BottomNavigationView) findViewById(R.id.bottomNavigation);
         mBottomNav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -189,13 +198,13 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         FirebaseUser user = auth.getCurrentUser();
 
         //if you want to update the items at a later time it is recommended to keep it in a variable
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Welcome back").withIconColorRes(R.color.colorPrimaryDark);
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Inspections");
 
         // Create the AccountHeader
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.color.colorPrimaryDark)
-                .withSelectionListEnabledForSingleProfile(false)
+                .withSelectionListEnabledForSingleProfile(true)
                 .addProfiles(
                         new ProfileDrawerItem().withName(user.getDisplayName()).withEmail(user.getEmail()).withIcon(user.getPhotoUrl())
                 )
@@ -213,26 +222,35 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                 .withToolbar(toolbar)
                 .withActionBarDrawerToggle(true)
                 .withActionBarDrawerToggleAnimated(true)
+                .withSliderBackgroundColor(Color.parseColor("#FFFFFF"))
                 .addDrawerItems(
-                        item1,
+                        item1.withIcon(GoogleMaterial.Icon.gmd_home),
+                        new PrimaryDrawerItem().withName("Account").withIcon(GoogleMaterial.Icon.gmd_person),
                         new DividerDrawerItem(),
-                        new SecondaryDrawerItem().withName("ACCOUNT"),
-                        new DividerDrawerItem(),
-                        new SecondaryDrawerItem().withName("Log Out").withIconColorRes(R.color.colorBlack)
+                        new PrimaryDrawerItem().withName("Settings").withIcon(GoogleMaterial.Icon.gmd_settings),
+                        new PrimaryDrawerItem().withName("Help & feedback").withIcon(GoogleMaterial.Icon.gmd_help)
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         // do something with the clicked item :D
-                        if (position == 6){
-                            FirebaseAuth.getInstance().signOut();
-
-                            Intent loginIntent = new Intent(getBaseContext(), SplashScreenActivity.class);
-                            loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(loginIntent);
-
+                        if (position == 1) {
+                            //inspection fragment / main activity
+                            //already in this activity
+                            return false;
+                        }else if (position == 2){
+                            //account fragment
+                            Intent accountIntent = new Intent(getBaseContext(), AccountActivity.class);
+                            accountIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(accountIntent);
                             return  true;
-                        }else {
+                        }else if (position == 4){
+                            //settings fragment
+                            return false;
+                        }else if (position == 5){
+                            //help and feedback fragment
+                            return false;
+                        }else{
                             return false;
                         }
                     }
@@ -243,8 +261,21 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         //result.updateName(1, "A name");
 
         //the result object also allows you to add new items, remove items, add footer, sticky footer, ..
-//        result.addItem(new DividerDrawerItem());
-//        result.addStickyFooterItem(new PrimaryDrawerItem().withName("Switch to admin"));
+        result.addItem(new DividerDrawerItem());
+        result.addStickyFooterItem(new PrimaryDrawerItem().withName("Log Out").withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+
+                //log out
+                FirebaseAuth.getInstance().signOut();
+
+                Intent loginIntent = new Intent(getBaseContext(), SplashScreenActivity.class);
+                loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(loginIntent);
+
+                return  true;
+            }
+        }));
 
     }
 

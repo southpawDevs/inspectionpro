@@ -33,9 +33,6 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
     private List<Inspection> inspectionsData;
 
-    private static int viewHolderCount;
-    private int mNumberItems;
-
     final private RecyclerItemClickListener mOnClickListener;
 
     public interface RecyclerItemClickListener {

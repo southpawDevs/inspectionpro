@@ -5,6 +5,6 @@
         android:id="@+id/inspection_create"
         android:title="@string/inspection_create"
         app:showAsAction="never"
-        android:icon="@drawable/ic_home_black_24dp"/>
+        android:icon="@drawable/ic_check_black_24dp"/>
 
 </menu>
