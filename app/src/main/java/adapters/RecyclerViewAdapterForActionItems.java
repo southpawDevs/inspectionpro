@@ -2,6 +2,7 @@ package adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -16,13 +17,19 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 
 import java.lang.annotation.Target;
@@ -33,7 +40,9 @@ import javax.sql.DataSource;
 import devs.southpaw.com.inspectionpro.FirebaseUtil;
 import devs.southpaw.com.inspectionpro.UIUtil;
 import devs.southpaw.com.inspectionpro.R;
+import layout.ItemDetailsActivity;
 import objects.ActionItems;
+import objects.InspectionItem;
 
 /**
  * Created by keith on 07/03/2018.
@@ -100,14 +109,14 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
                         holder.actionImageView.setVisibility(View.GONE);
                         holder.progressBar.setVisibility(View.GONE);
 
-                        return true;
+                        return false;
                     }
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, com.bumptech.glide.request.target.Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                         holder.actionImageView.setVisibility(View.VISIBLE);
                         holder.progressBar.setVisibility(View.GONE);
-                        return true;
+                        return false;
                     }
                 })
                 .into(holder.actionImageView);
@@ -171,6 +180,32 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
 
         @Override
         public void onClick(View v) {
+
+            final ActionItems ai = actionItemsData.get(getAdapterPosition());
+
+            DocumentReference itemRef = FirebaseUtil.getInspectionItem(mActivity, ai.getInspection_id(), ai.getItem_existing_id());
+
+            itemRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.getResult() != null){
+                        InspectionItem item = task.getResult().toObject(InspectionItem.class);
+
+                        // Serialization
+                        Gson gson = new Gson();
+                        String itemJson = gson.toJson(item);
+
+                        Intent intentItemDetail =  new Intent(context, ItemDetailsActivity.class);
+                        intentItemDetail.putExtra("inspection_name" , ai.getInspection_name());
+                        intentItemDetail.putExtra("inspection_id" , ai.getInspection_id());
+                        intentItemDetail.putExtra("selected_item" , itemJson);
+                        context.startActivity(intentItemDetail);
+                    }else{
+                        Toast.makeText(mContext, "Fail to retrieve item", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
 
 
         }

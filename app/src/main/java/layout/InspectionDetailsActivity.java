@@ -1,6 +1,8 @@
 package layout;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -32,6 +34,8 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -40,6 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import devs.southpaw.com.inspectionpro.FirebaseUtil;
 import devs.southpaw.com.inspectionpro.R;
 import adapters.RecyclerViewAdapterForItem;
 import objects.Inspection;
@@ -66,6 +71,8 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+
+    private Activity mActivity = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -323,7 +330,6 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
     private void submitInspection(int completedCount, int totalCount){
 
         if (completedCount == totalCount){
-            //Toast.makeText(getBaseContext(), "Inspection submitted succesfully(no_func_yet)", Toast.LENGTH_SHORT).show();
 
             FirebaseAuth auth = FirebaseAuth.getInstance();
             FirebaseUser user = auth.getCurrentUser();
@@ -374,6 +380,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
                         );
 
+                        //refresh inspection item value
                         for(int l=0; l<=itemsData.size()-1; l++){
                             String currentItemID = itemsData.get(l).getItem_id();
 
@@ -390,9 +397,35 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                                 );
                             }
 
+                            final StorageReference storageRef = FirebaseUtil.getStorageRef(mActivity);
+                            StorageReference imageLocation = storageRef.child("images/temp_" + currentItemID);
+                            imageLocation.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+
+                                    UploadTask uploadTask = storageRef.child("images").child("inspection_archives").child(selectedInspectionID).putFile(uri);
+                                    // Register observers to listen for when the download is done or if it fails
+                                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception exception) {
+                                            // Handle unsuccessful uploads
+                                        }
+                                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                        }
+                                    });
+
+
+                                }
+                            });
+
                             Toast.makeText(getBaseContext(),"Inspection Submitted", Toast.LENGTH_SHORT).show();
                             finish();
                         }
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

@@ -149,7 +149,8 @@ public class AccountFragment extends Fragment {
             IconicsDrawable userIcon = new IconicsDrawable(getActivity())
                     .icon(GoogleMaterial.Icon.gmd_photo_camera)
                     .color(Color.parseColor("#303F9F"))
-                    .sizeDp(15);
+                    .sizeDp(80)
+                    .paddingDp(18);
             profilePicIV.setImageDrawable(userIcon);
         }else{
             Glide.with(this).load(imagePath).centerCrop().into(profilePicIV);
@@ -191,6 +192,7 @@ public class AccountFragment extends Fragment {
         } else if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
 
             Uri uriImage = Uri.fromFile(new File(mCurrentPhotoPath));
+            profilePicIV.setImageURI(uriImage);
             updateProfileImage(uriImage);
         }
 
@@ -259,43 +261,8 @@ public class AccountFragment extends Fragment {
 
     public void updateProfileImage(Uri filePathUrl){
 
-        String path = "users/" + user.getUid()+ "/profile_picture_" + user.getUid();
-        Boolean uploadingImage = FirebaseUtil.uploadImageToStorageProperty(String.valueOf(filePathUrl), path , getActivity(), "Profile Image");
-
-
-//            .addOnFailureListener(new OnFailureListener() {
-//                @Override
-//                public void onFailure(@NonNull Exception exception) {
-//                    // Handle unsuccessful uploads
-//                    Toast.makeText(getContext(),"Fail to add item", Toast.LENGTH_SHORT).show();
-//
-//                }
-//            })
-//            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-//                @Override
-//                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                    //taskSnapshot.getMetadata() contains file metadata such as size, content-type, and     download URL.
-//                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
-//
-//                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-//                            .setPhotoUri(downloadUrl)
-//                            .build();
-//
-//                    //update Firebase Auth User
-//                    user.updateProfile(profileUpdates)
-//                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                @Override
-//                                public void onComplete(@NonNull Task<Void> task) {
-//                                    if (task.isSuccessful()) {
-//                                        Log.d("Firebase User", "User profile updated.");
-//                                        Toast.makeText(getContext(),"Profile image updated", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                }
-//                            });
-//
-//                }
-//            });
-
+        String path = "users/"+user.getUid()+"/"+user.getUid();
+        Boolean uploadingImage = FirebaseUtil.uploadImageToStorageProperty(String.valueOf(filePathUrl), path , getActivity(), "profile_image", profilePicIV);
 
     }
 

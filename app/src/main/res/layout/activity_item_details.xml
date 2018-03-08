@@ -157,7 +157,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="60dp"
                 android:fontFamily="@font/oxygen"
                 android:gravity="center"
                 android:text="Status Question"
@@ -167,6 +167,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
+                android:layout_marginBottom="30dp"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:padding="5dp">
@@ -187,7 +188,7 @@
                         android:background="@color/colorStatusGrey"
                         android:fontFamily="@font/oxygen_bold"
                         android:gravity="center"
-                        android:text="GREY"
+                        android:text=""
                         android:textColor="@color/colorPrimaryWhite" />
 
                 </android.support.v7.widget.CardView>
@@ -206,7 +207,8 @@
                         android:layout_height="match_parent"
                         android:background="@color/colorStatusRed"
                         android:fontFamily="@font/oxygen_bold"
-                        android:text="RED"
+                        android:text="NO"
+                        android:textSize="18dp"
                         android:textColor="@color/colorPrimaryWhite" />
 
                 </android.support.v7.widget.CardView>
@@ -225,10 +227,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@color/colorStatusGreen"
-                        android:fontFamily="@font/oxygen"
-                        android:text="GREEN"
+                        android:fontFamily="@font/oxygen_bold"
+                        android:text="YES"
                         android:textColor="@color/colorPrimaryWhite"
-                        android:textSize="10sp" />
+                        android:textSize="18sp" />
 
                 </android.support.v7.widget.CardView>
 

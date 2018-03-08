@@ -85,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
     @Override
     protected void onResume() {
         super.onResume();
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.inspection_menu);
         mBottomNav.setSelectedItemId(mSelectedItem);
     }
 
@@ -155,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         switch (item.getItemId()) {
             case R.id.navigation_inspection:
                 frag = InspectionFragment.newInstance("title", "inspection");
+                toolbar.getMenu().clear();
                 toolbar.inflateMenu(R.menu.inspection_menu);
                 break;
             case R.id.navigation_action:
@@ -189,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
             case 1:
                 //main
                 frag = InspectionFragment.newInstance("title", "inspection");
+                toolbar.getMenu().clear();
                 toolbar.inflateMenu(R.menu.inspection_menu);
                 mBottomNav.setVisibility(View.VISIBLE);
                 break;

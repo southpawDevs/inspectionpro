@@ -62,7 +62,6 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
         return viewHolder;
     }
 
-    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(RecyclerViewAdapterForInspection.ViewHolder holder, int position) {
 
@@ -119,9 +118,9 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
                 hoursRemaining = getHoursRemaining(supposeToCheckDate);
 
                 dueInText = handleDueInText(hoursRemaining);
-                holder.inspectionTitle.setTextColor(R.color.colorBlack);
-                holder.inspectionLastChecked.setTextColor(R.color.colorBlack);
-                holder.inspectionItemsCount.setTextColor(R.color.colorBlack);
+                holder.inspectionTitle.setTextColor(Color.parseColor("#333333"));
+                holder.inspectionLastChecked.setTextColor(Color.parseColor("#333333"));
+                holder.inspectionItemsCount.setTextColor(Color.parseColor("#333333"));
             }else{
                 holder.cardBackground.setCardBackgroundColor(Color.parseColor("#fa4048"));
                 holder.inspectionReady.setVisibility(View.GONE);

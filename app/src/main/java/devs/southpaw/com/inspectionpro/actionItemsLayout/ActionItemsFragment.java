@@ -131,7 +131,7 @@ public class ActionItemsFragment extends Fragment implements RecyclerViewAdapter
     public void onResume() {
         super.onResume();
 
-        getActionItemsData();
+        //getActionItemsData();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -187,6 +187,11 @@ public class ActionItemsFragment extends Fragment implements RecyclerViewAdapter
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
+
+                    if (task.getResult().isEmpty()){
+                        refreshContainer.setRefreshing(false);
+                        Toast.makeText(getActivity(), "No Data", Toast.LENGTH_SHORT).show();
+                    }
 
                     List<ActionItems> tempArray = new ArrayList<>();
                     for (DocumentSnapshot document : task.getResult()) {

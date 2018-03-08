@@ -3,6 +3,7 @@ package devs.southpaw.com.inspectionpro;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.support.annotation.NonNull;
@@ -13,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,6 +36,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -160,6 +163,13 @@ public class FirebaseUtil {
         return  inspectionsColl;
     }
 
+    public static DocumentReference getInspectionItem(final Activity activity, String inspectionID, String itemID){
+
+        final CollectionReference inspectionsColl = getPropertyRefFromFirestore(activity).collection("inspections");
+
+        return  inspectionsColl.document(inspectionID).collection("items").document(itemID);
+    }
+
 
 
     //FIREBASE STORAGE
@@ -168,19 +178,25 @@ public class FirebaseUtil {
         return storageRef.child(SharedPrefUtil.getPropertyID(activity));
     }
 
-    public static Boolean uploadImageToStorageProperty(String imageFilePath, final String childPathAfterImages, final Activity activity, final String toastCategory){
+    public static Boolean uploadImageToStorageProperty(String imageFilePath, final String childPathAfterImages, final Activity activity, final String toastCategory, ImageView imageView){
 
         StorageReference storagePath;
 
         String propertyID = SharedPrefUtil.getPropertyID(activity);
 
-        storagePath = storageRef.child(propertyID).child("images");
-
-        storagePath.child(childPathAfterImages);
-
         Uri file = Uri.fromFile(new File(imageFilePath));
 
-        UploadTask uploadTask = storagePath.putFile(file);
+        storagePath = storageRef.child(propertyID).child("images/"+childPathAfterImages+file.getLastPathSegment());
+
+
+        imageView.setDrawingCacheEnabled(true);
+        imageView.buildDrawingCache();
+        Bitmap bitmap = imageView.getDrawingCache();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        UploadTask uploadTask = storagePath.putBytes(data);
 
         uploadTask
             .addOnFailureListener(new OnFailureListener() {

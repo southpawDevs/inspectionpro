@@ -449,7 +449,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
         final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
 
-        //update firestore
+        //update firestore inspection item
         itemsColl.document(item_id)
                 .update("item_status", status,
                         "item_reported_at", new Date(),
@@ -472,6 +472,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                     }
                 });
 
+        //update firestore Action Items
         if (status == 1) {
             //red
 
@@ -479,72 +480,17 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
             //initailize action item
             ActionItems actionItem = new ActionItems(item_id, selectedItem.getItem_name(), selectedItem.getItem_comments(), new Date(), user.getEmail(), selectedItem.getItem_condition_photo(), inspectionName, inspectionID);
-            //update firestore
-            actionItemsColl.add(actionItem)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            String action_item_id = documentReference.getId().toString();
 
-                            if (selectedItem.getItem_condition_photo() != null){
-                               // uploadImageToActionItemStorage(action_item_id, actionItemsColl);
-                            }
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                        }
-                    });
+            actionItemsColl.document(selectedItem.getItem_id()).set(actionItem);
+            Toast.makeText(getBaseContext(), "added to action item", Toast.LENGTH_SHORT).show();
+        }else{
+            final CollectionReference actionItemsColl = devHousePropertyDoc.collection("actionItems");
+            actionItemsColl.document(selectedItem.getItem_id()).delete();
+            Toast.makeText(getBaseContext(), "removed from action item", Toast.LENGTH_SHORT).show();
         }
 
     }
 
-    private String uploadImageToActionItemStorage(final String action_item_id, final CollectionReference collRef){
-        //initialize storage
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        // Create a storage reference from our app
-        StorageReference storageRef = storage.getReference();
-
-        final String[] urlString = {new String()};
-
-        // Create a child reference
-        // imagesRef now points to "images"
-        StorageReference imagesItemRef = storageRef.child("oNJZmUlwxGxAymdyKoIV").child("images").child("inspection_actionItems").child("actionItems_"+ action_item_id);
-
-        Uri file = Uri.fromFile(new File(mCurrentPhotoPath));
-
-        UploadTask uploadTask2 = imagesItemRef.putFile(file);
-
-        uploadTask2.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-                Toast.makeText(getBaseContext(),"Fail to add item", Toast.LENGTH_SHORT).show();
-
-                //createButton.setClickable(true);
-
-                //progressBar.setVisibility(View.INVISIBLE);
-                urlString[0] = "";
-
-                return;
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                //taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                urlString[0] = String.valueOf(downloadUrl);
-
-                collRef.document(action_item_id).update("item_reported_photo", downloadUrl);
-
-                return;
-            }
-        });
-
-        return urlString[0];
-    }
 
     private void deleteInspectionItem(CollectionReference colRef, String itemID){
         colRef.document(itemID)
