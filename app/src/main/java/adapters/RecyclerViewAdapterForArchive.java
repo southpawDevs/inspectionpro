@@ -1,16 +1,22 @@
 package adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.util.List;
 
 import devs.southpaw.com.inspectionpro.R;
+import devs.southpaw.com.inspectionpro.archiveLayout.ArchiveItemsActivity;
+import layout.InspectionDetailsActivity;
 import objects.Inspection;
 
 /**
@@ -88,6 +94,22 @@ public class RecyclerViewAdapterForArchive extends RecyclerView.Adapter<Recycler
         @Override
         public void onClick(View v) {
 
+            int clickedPosition = getAdapterPosition();
+            v.setClickable(false);
+
+            Inspection selectedInspection = inspectionsArchive.get(clickedPosition);
+
+            // Serialization
+            Gson gson = new Gson();
+            String inspectionJson = gson.toJson(selectedInspection);
+
+            //intent when clicked
+            Intent intentInspectionArchive =  new Intent(context, ArchiveItemsActivity.class);
+            intentInspectionArchive.putExtra(ArchiveItemsActivity.EXTRA_NAME , inspectionsArchive.get(clickedPosition).getInspection_name());
+            intentInspectionArchive.putExtra("inspection", inspectionJson);
+
+            Log.d("inspection archive", inspectionsArchive.get(clickedPosition).getInspection_name());
+            context.startActivity(intentInspectionArchive);
 
         }
     }

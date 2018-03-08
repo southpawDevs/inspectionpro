@@ -148,7 +148,7 @@ public class InspectionItemAddActivity extends AppCompatActivity {
             FirebaseAuth auth = FirebaseAuth.getInstance();
             FirebaseUser user = auth.getCurrentUser();
 
-            InspectionItem item = new InspectionItem(title, description, method, condition, null, null, null, null, 0, null,question);
+            InspectionItem item = new InspectionItem(title, description, method, condition, null, null,null,null, null, null, 0, null,question);
 
             createNewItem(item);
         }

@@ -58,9 +58,6 @@
         </provider>
 
         <activity android:name=".archiveLayout.ArchiveItemsActivity" />
-
-        <activity android:name=".accountLayout.AccountActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

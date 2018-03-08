@@ -31,7 +31,8 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:fontFamily="@font/oxygen"
-                    android:textColor="@color/colorPrimaryDark"/>
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="16dp"/>
 
                     <android.support.v7.widget.RecyclerView
                         android:layout_width="match_parent"
@@ -55,7 +56,11 @@
                     android:layout_height="50dp"
                     android:text="SUBMIT INSPECTION"
                     android:id="@+id/submit_inspection_button"
-                    android:layout_margin="15dp"/>
+                    android:layout_margin="15dp"
+                    android:fontFamily="@font/oxygen_bold"
+                    android:textSize="15dp"
+                    android:textColor="@color/colorPrimaryWhite"
+                    android:background="@color/colorPrimary"/>
 
             </LinearLayout>
 

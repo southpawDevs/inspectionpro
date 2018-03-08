@@ -2,6 +2,7 @@ package objects;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by keith on 30/01/2018.
@@ -16,11 +17,12 @@ public class Inspection{
     private String inspection_modified_by;
     private Date inspection_modified_at;
     private String inspection_submitted_by;
+    private String inspection_submitted_by_name;
     private Date inspection_submitted_at;
     private int inspection_status;
     private int inspection_items_count;
     private int inspection_days;
-    private ArrayList<String> inspection_items = new ArrayList<>();
+    private List<InspectionItem> inspection_items_object = new ArrayList<>();
 
     //add department ( marine , drilling)
 
@@ -29,7 +31,7 @@ public class Inspection{
     }
 
     //constructor
-    public Inspection(String inspectionName, Date inspection_created_at, String inspectionCreatedBy, Date inspectionModifiedAt, String inspectionModifiedBy, String inspection_submitted_by, Date inspection_submitted_at ,int inspectionStatus, int inspection_items_count, int inspection_days) {
+    public Inspection(String inspectionName, Date inspection_created_at, String inspectionCreatedBy, Date inspectionModifiedAt, String inspectionModifiedBy, String inspection_submitted_by, String inspection_submitted_by_name, Date inspection_submitted_at ,int inspectionStatus, int inspection_items_count, int inspection_days) {
         this.inspection_name = inspectionName;
         this.inspection_created_at = inspection_created_at;
         this.inspection_created_by = inspectionCreatedBy;
@@ -67,6 +69,10 @@ public class Inspection{
         return inspection_submitted_by;
     }
 
+    public String getInspection_submitted_by_name() {
+        return inspection_submitted_by_name;
+    }
+
     public Date getInspection_submitted_at() {
         return inspection_submitted_at;
     }
@@ -86,8 +92,8 @@ public class Inspection{
     public int getInspection_items_count(){return inspection_items_count;}
 
     //get itemArray
-    public ArrayList<String> getInspectionItems() {
-        return inspection_items;
+    public List<InspectionItem> getInspection_items_object() {
+        return inspection_items_object;
     }
 
     //setters
@@ -113,6 +119,14 @@ public class Inspection{
 
     public void setInspection_submitted_by(String inspection_submitted_by) {
         this.inspection_submitted_by = inspection_submitted_by;
+    }
+
+    public void setInspection_submitted_by_name(String inspection_submitted_by_name) {
+        this.inspection_submitted_by_name = inspection_submitted_by_name;
+    }
+
+    public void setInspection_items(List<InspectionItem> inspection_items_object) {
+        this.inspection_items_object = inspection_items_object;
     }
 
 }

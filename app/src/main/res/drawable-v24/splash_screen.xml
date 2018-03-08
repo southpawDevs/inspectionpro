@@ -6,7 +6,7 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/sheave_image"/>
+            android:src="@drawable/splash_screen_logo"/>
     </item>
 
 </layer-list>

@@ -331,20 +331,23 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
             Inspection archive = new Inspection();
             archive = selectedInspection;
             archive.setInspection_submitted_at(new Date());
-            archive.setInspection_created_by(user.getUid());
+            archive.setInspection_submitted_by(user.getUid());
+            archive.setInspection_submitted_by_name(user.getDisplayName());
 
-            createInspectionArchive(archive, archive.getInspection_submitted_at(), user.getUid());
+            createInspectionArchive(archive, archive.getInspection_submitted_at(), user.getUid(), user.getDisplayName());
         }else{
             Toast.makeText(getBaseContext(), "Please inspect the remaining items", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void createInspectionArchive(Inspection archiveInspection, final Date newDate, final String uid){
+    private void createInspectionArchive(Inspection archiveInspection, final Date newDate, final String uid, final String name){
         final String selectedInspectionID = selectedInspection.getInspection_id();
         final CollectionReference archiveColl = devHousePropertyDoc.collection("archives");
 
         Map<String, Object> data = new HashMap<>();
         data.put("inspection_name", archiveInspection.getInspection_name());
+
+        archiveInspection.setInspection_items(itemsData);
 
         archiveColl.document(selectedInspectionID).set(data);
         archiveColl.document(selectedInspectionID).collection("inspected_history").add(archiveInspection)
@@ -360,23 +363,32 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                         //progressBar.setVisibility(View.INVISIBLE);
 
                         //refresh current inspection
+                        //update last submitted in holding inspection
                         final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
                         CollectionReference itemsColl = inspectionsColl.document(selectedInspectionID).collection("items");
                         inspectionsColl.document(selectedInspectionID).update(
 
                                 "inspection_submitted_at", newDate,
-                                "inspection_submitted_by", uid
+                                "inspection_submitted_by", uid,
+                                "inspection_submitted_by", name
 
                         );
 
                         for(int l=0; l<=itemsData.size()-1; l++){
                             String currentItemID = itemsData.get(l).getItem_id();
 
-                            itemsColl.document(currentItemID).update(
-                                    "item_status", 0,
-                                "item_condition_photo", null
+                            if (itemsData.get(l).getItem_status() == 1){
+                                itemsColl.document(currentItemID).update(
+                                        "item_condition_photo", null
 
-                            );
+                                );
+                            }else {
+                                itemsColl.document(currentItemID).update(
+                                        "item_status", 0,
+                                        "item_condition_photo", null
+
+                                );
+                            }
 
                             Toast.makeText(getBaseContext(),"Inspection Submitted", Toast.LENGTH_SHORT).show();
                             finish();

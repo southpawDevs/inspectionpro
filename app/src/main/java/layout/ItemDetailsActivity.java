@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
-import android.media.ExifInterface;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -25,13 +23,18 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.common.RotationOptions;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -39,17 +42,19 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.stfalcon.frescoimageviewer.ImageViewer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import devs.southpaw.com.inspectionpro.R;
+import objects.ActionItems;
 import objects.InspectionItem;
 
 public class ItemDetailsActivity extends AppCompatActivity {
@@ -62,20 +67,22 @@ public class ItemDetailsActivity extends AppCompatActivity {
     private TextView itemQuestion;
     private Button addConditionImageButton;
     private Button updateCommentButton;
-    private ImageView snapshotImageView;
+    private SimpleDraweeView snapshotImageView;
     InspectionItem selectedItem;
     String inspectionName;
     String inspectionID;
-    private  ImageView itemImageView;
+    private SimpleDraweeView itemImageView;
 
     private Button itemStatus0;
     private Button itemStatus1;
     private Button itemStatus2;
 
-
     private int REQUEST_CODE = 1880;
 
     String mCurrentPhotoPath;
+
+    FirebaseAuth auth = FirebaseAuth.getInstance();
+    FirebaseUser user = auth.getCurrentUser();
 
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -155,6 +162,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_item_details);
 
         ActionBar actionBar = getSupportActionBar();
@@ -167,8 +175,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
         itemComments = (EditText) findViewById(R.id.item_comment_edit_text);
         itemQuestion = (TextView) findViewById(R.id.item_question_text_view);
         addConditionImageButton = (Button) findViewById(R.id.add_condition_image_button);
-        snapshotImageView = (ImageView) findViewById(R.id.snapshot_image_view);
-        itemImageView = (ImageView) findViewById(R.id.item_image_view);
+        snapshotImageView = (SimpleDraweeView) findViewById(R.id.snapshot_image_view);
+        itemImageView = (SimpleDraweeView) findViewById(R.id.item_image_view);
         updateCommentButton = (Button) findViewById(R.id.update_comment_button);
 
         itemStatus0 = (Button) findViewById(R.id.item_status_0);
@@ -176,6 +184,20 @@ public class ItemDetailsActivity extends AppCompatActivity {
         itemStatus2 = (Button) findViewById(R.id.item_status_2);
 
         snapshotImageView.setVisibility(View.GONE);
+        snapshotImageView.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                openWithUrl(selectedItem.getItem_condition_photo());
+            }
+        });
+
+        itemImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openWithUrl(selectedItem.getItem_photo());
+            }
+        });
 
         // Deserialization
         String itemJson= getIntent().getStringExtra("selected_item");
@@ -197,6 +219,14 @@ public class ItemDetailsActivity extends AppCompatActivity {
                 dispatchTakePictureIntent();
             }
         });
+
+        IconicsDrawable cameraIcon = new IconicsDrawable(this)
+                .icon(GoogleMaterial.Icon.gmd_add_a_photo)
+                .color(Color.WHITE)
+                .backgroundColor(Color.GRAY)
+                .sizeDp(8)
+                .paddingDp(15);
+        addConditionImageButton.setBackground(cameraIcon);
 
         updateCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -222,21 +252,21 @@ public class ItemDetailsActivity extends AppCompatActivity {
         itemStatus0.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateStatusToFirebase(selectedItem.getItem_id(), 0);
+                updateStatusToFirestore(selectedItem.getItem_id(), 0);
             }
         });
 
         itemStatus1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateStatusToFirebase(selectedItem.getItem_id(), 1);
+                updateStatusToFirestore(selectedItem.getItem_id(), 1);
             }
         });
 
         itemStatus2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateStatusToFirebase(selectedItem.getItem_id(), 2);
+                updateStatusToFirestore(selectedItem.getItem_id(), 2);
             }
         });
 
@@ -315,8 +345,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
         String conditionImageUrl = selectedItem.getItem_condition_photo();
 
-        if (conditionImageUrl != "" || conditionImageUrl != null){
-            Glide.with(this).load(conditionImageUrl).fitCenter().into(snapshotImageView);
+        if (conditionImageUrl != null){
+            Glide.with(this).load(conditionImageUrl).override(200,200).fitCenter().into(snapshotImageView);
             snapshotImageView.setVisibility(View.VISIBLE);
         }else{
             snapshotImageView.setVisibility(View.GONE);
@@ -386,7 +416,10 @@ public class ItemDetailsActivity extends AppCompatActivity {
             final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
 
             //update firestore
-            itemsColl.document(item_id).update("item_comments", comments)
+            itemsColl.document(item_id)
+                    .update("item_comments", comments,
+                            "item_reported_at", new Date(),
+                            "item_reported_by", user.getEmail())
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
@@ -409,7 +442,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void updateStatusToFirebase(String item_id, int status){
+    private void updateStatusToFirestore(String item_id, int status){
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
@@ -417,7 +450,11 @@ public class ItemDetailsActivity extends AppCompatActivity {
         final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
 
         //update firestore
-        itemsColl.document(item_id).update("item_status", status)
+        itemsColl.document(item_id)
+                .update("item_status", status,
+                        "item_reported_at", new Date(),
+                        "item_reported_by", user.getEmail()
+                )
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -434,6 +471,79 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         Toast.makeText(getBaseContext(), "fail to update status", Toast.LENGTH_SHORT).show();
                     }
                 });
+
+        if (status == 1) {
+            //red
+
+            final CollectionReference actionItemsColl = devHousePropertyDoc.collection("actionItems");
+
+            //initailize action item
+            ActionItems actionItem = new ActionItems(item_id, selectedItem.getItem_name(), selectedItem.getItem_comments(), new Date(), user.getEmail(), selectedItem.getItem_condition_photo(), inspectionName, inspectionID);
+            //update firestore
+            actionItemsColl.add(actionItem)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            String action_item_id = documentReference.getId().toString();
+
+                            if (selectedItem.getItem_condition_photo() != null){
+                               // uploadImageToActionItemStorage(action_item_id, actionItemsColl);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    });
+        }
+
+    }
+
+    private String uploadImageToActionItemStorage(final String action_item_id, final CollectionReference collRef){
+        //initialize storage
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference();
+
+        final String[] urlString = {new String()};
+
+        // Create a child reference
+        // imagesRef now points to "images"
+        StorageReference imagesItemRef = storageRef.child("oNJZmUlwxGxAymdyKoIV").child("images").child("inspection_actionItems").child("actionItems_"+ action_item_id);
+
+        Uri file = Uri.fromFile(new File(mCurrentPhotoPath));
+
+        UploadTask uploadTask2 = imagesItemRef.putFile(file);
+
+        uploadTask2.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+                Toast.makeText(getBaseContext(),"Fail to add item", Toast.LENGTH_SHORT).show();
+
+                //createButton.setClickable(true);
+
+                //progressBar.setVisibility(View.INVISIBLE);
+                urlString[0] = "";
+
+                return;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                //taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                urlString[0] = String.valueOf(downloadUrl);
+
+                collRef.document(action_item_id).update("item_reported_photo", downloadUrl);
+
+                return;
+            }
+        });
+
+        return urlString[0];
     }
 
     private void deleteInspectionItem(CollectionReference colRef, String itemID){
@@ -466,5 +576,30 @@ public class ItemDetailsActivity extends AppCompatActivity {
             inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
     }
+
+
+    ///////open image viewer
+    private void openWithUrl(String url){
+
+        List<String> images = new ArrayList<>();
+
+        images.add(url);
+
+        ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(Uri.parse(url))
+                .setRotationOptions(RotationOptions.autoRotate())
+                .build();
+
+        ImageViewer imageViewer;
+        imageViewer = new ImageViewer.Builder<>(this, images)
+                .setStartPosition(0)
+                .hideStatusBar(false)
+                .allowZooming(true)
+                .allowSwipeToDismiss(true)
+                .setCustomImageRequestBuilder(ImageRequestBuilder.fromRequest(imageRequest))
+                .build();
+
+        imageViewer.show();
+    }
+
 
 }

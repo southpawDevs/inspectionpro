@@ -5,6 +5,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.common.RotationOptions;
+import com.facebook.imagepipeline.core.ImagePipelineConfig;
+import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.FirebaseApp;
@@ -16,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,6 +37,15 @@ public class SplashScreenActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(this)
+                .setProgressiveJpegConfig(new SimpleProgressiveJpegConfig())
+                .setResizeAndRotateEnabledForNetwork(true)
+                .setDownsampleEnabled(true)
+                .build();
+
+        Fresco.initialize(this, config);
+
         super.onCreate(savedInstanceState);
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -58,6 +74,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                             .createSignInIntentBuilder()
                             .setAvailableProviders(providers)
                             .setTheme(R.style.AppThemeFirebaseAuth)
+                            .setLogo(R.drawable.splash_screen_logo)
                             .build(),
                     RC_SIGN_IN);
         }
@@ -75,7 +92,10 @@ public class SplashScreenActivity extends AppCompatActivity {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                registerUserToRealtimeDatabase(user);
+                FirebaseUtil.savePropertyIDFromUser(getApplicationContext());
+
+                String pid = SharedPrefUtil.getPropertyID(this);
+                registerUserToFirestore(pid);
 
                 //log in to main screen
                 Intent intent = new Intent(this, MainActivity.class);
@@ -91,45 +111,33 @@ public class SplashScreenActivity extends AppCompatActivity {
         }
     }
 
-    void registerUserToRealtimeDatabase(final FirebaseUser firebaseUser){
+    void registerUserToFirestore(String pid){
+        FirebaseUser user = FirebaseUtil.getFirebaseUser();
+        final String uid = user.getUid();
+        final String username = user.getDisplayName();
+        final String email = user.getEmail();
+        final String photoUrl;
 
-        final String uid = firebaseUser.getUid();
-        final String username = firebaseUser.getDisplayName();
-        final String email = firebaseUser.getEmail();
+        Boolean admin = false;
+        Boolean developer = false;
+        if (email == "inspectionpro.dev@gmail.com"){
+            admin = true;
+            developer = true;
+        }else{
+            admin = false;
+            developer = false;
+        }
 
-        usersReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        if (user.getPhotoUrl() != null){
+            photoUrl = String.valueOf(user.getPhotoUrl());
+        }else{
+            photoUrl = "";
+        }
 
-            Boolean admin;
-            Boolean developer;
+        User registerUser = new User(uid, username, email, admin, developer, photoUrl, pid);
 
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.hasChild(uid) == false){
-
-                    Log.d("userEmail", email);
-                    if (email == "inspectionpro.dev@gmail.com"){
-                        admin = true;
-                        developer = true;
-                        User user = new User(uid, username, email, admin, developer);
-
-                        usersReference.child(uid).setValue(user);
-                    }else {
-
-                        admin = false;
-                        developer = false;
-                        User user = new User(uid, username, email, admin, developer);
-
-                        usersReference.child(uid).setValue(user);
-                    }
-                }
-            }//end on data change
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                //
-            }
-        });
-
+        FirebaseUtil.setUsersFromFirestore(registerUser);
     }
+
 
 }

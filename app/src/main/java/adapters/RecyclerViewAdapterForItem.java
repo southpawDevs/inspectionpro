@@ -32,6 +32,7 @@ import com.mikepenz.iconics.view.IconicsImageView;
 import java.util.List;
 
 import devs.southpaw.com.inspectionpro.R;
+import devs.southpaw.com.inspectionpro.UIUtil;
 import layout.ItemDetailsActivity;
 import objects.InspectionItem;
 
@@ -190,8 +191,16 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
             doneLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String id = inspectionItemsData.get(getAdapterPosition()).getItem_id();
-                    updateDoneStatusToFirebase(id, 2);
+                    int position = getAdapterPosition();
+                    InspectionItem selectedItem = inspectionItemsData.get(position);
+
+                    String id = selectedItem.getItem_id();
+
+                    if (selectedItem.getItem_status() != 2) {
+                        updateDoneStatusToFirebase(id, 2);
+                    }
+
+                    viewBinderHelper.closeLayout(id);
                 }
             });
 

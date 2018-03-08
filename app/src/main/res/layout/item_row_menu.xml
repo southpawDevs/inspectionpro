@@ -12,9 +12,9 @@
         android:id="@+id/done_layout"
         android:layout_width="150dp"
         android:layout_height="match_parent"
-        android:background="@color/colorStatusDarkGreen"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp">
+        android:background="@color/colorStatusGreen"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <LinearLayout
             android:layout_width="match_parent"

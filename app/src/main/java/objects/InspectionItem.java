@@ -20,6 +20,8 @@ public class InspectionItem {
     private String item_check_question;
     private Date item_modified_at;
     private String item_modified_by;
+    private Date item_reported_at;
+    private String item_reported_by;
     private int item_status;
     private String inspection_id;
     private String item_condition_photo;
@@ -29,7 +31,7 @@ public class InspectionItem {
     }
 
     //constructor
-    public InspectionItem(String itemName, String itemDescription, String itemMethod, String itemCondition, String itemPhoto, String itemComments, Date itemModifiedAt, String itemModifiedBy, int itemStatus, String itemConditionPhoto, String itemCheckQuestion) {
+    public InspectionItem(String itemName, String itemDescription, String itemMethod, String itemCondition, String itemPhoto, String itemComments, Date itemModifiedAt, String itemModifiedBy, Date itemReportedAt, String itemReportedBy, int itemStatus, String itemConditionPhoto, String itemCheckQuestion) {
         this.item_name = itemName;
         this.item_description = itemDescription;
         this.item_method = itemMethod;
@@ -38,6 +40,8 @@ public class InspectionItem {
         this.item_comments = itemComments;
         this.item_modified_at = itemModifiedAt;
         this.item_modified_by = itemModifiedBy;
+        this.item_reported_at = itemReportedAt;
+        this.item_reported_by = itemReportedBy;
         this.item_status = itemStatus;
         this.item_condition_photo = itemConditionPhoto;
         this.item_check_question = itemCheckQuestion;
@@ -82,6 +86,14 @@ public class InspectionItem {
 
     public Date getItem_modified_at() {
         return item_modified_at;
+    }
+
+    public String getItem_reported_by() {
+        return item_reported_by;
+    }
+
+    public Date getItem_reported_at() {
+        return item_reported_at;
     }
 
     public String getItem_condition_photo(){return  item_condition_photo;}

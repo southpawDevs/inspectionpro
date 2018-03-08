@@ -1,0 +1,126 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="devs.southpaw.com.inspectionpro.accountLayout.AccountFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="58dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="210dp"
+                    android:background="@color/colorPrimaryDark"
+                    app:layout_constraintDimensionRatio="H, 16:9"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@color/colorPrimaryLight" />
+
+
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="130dp"
+                    android:layout_height="130dp"
+                    app:cardCornerRadius="50dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/colorLightGrey"
+                        android:id="@+id/profile_image"
+                        android:scaleType="fitCenter"/>
+
+                </android.support.v7.widget.CardView>
+
+            </android.support.constraint.ConstraintLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="u s e r n a m e"
+                android:textSize="16sp"
+                android:fontFamily="@font/oxygen"
+                android:layout_gravity="center"
+                android:textAlignment="center"/>
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NAME"
+                android:id="@+id/username_edit_text"
+                android:textSize="16sp"
+                android:fontFamily="@font/oxygen"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/colorPrimaryDark"
+                android:background="@color/fui_transparent"
+                android:inputType="textCapSentences"
+                android:maxLines="1"
+                android:imeOptions="actionDone"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="e m a i l"
+                android:textSize="16sp"
+                android:fontFamily="@font/oxygen"
+                android:layout_gravity="center"
+                android:textAlignment="center"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:id="@+id/email_text_view"
+                android:textSize="16sp"
+                android:fontFamily="@font/oxygen"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/colorPrimaryDark"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="u i d"
+                android:textSize="16sp"
+                android:fontFamily="@font/oxygen"
+                android:layout_gravity="center"
+                android:textAlignment="center"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:id="@+id/uid_text_view"
+                android:textSize="16sp"
+                android:fontFamily="@font/oxygen"
+                android:layout_gravity="center"
+                android:textAlignment="center"
+                android:layout_marginBottom="10dp"
+                android:textStyle="italic"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</FrameLayout>
