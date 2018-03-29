@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -44,18 +43,26 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import devs.southpaw.com.inspectionpro.accountLayout.AccountFragment;
 import devs.southpaw.com.inspectionpro.actionItemsLayout.ActionItemsFragment;
 import devs.southpaw.com.inspectionpro.archiveLayout.ArchiveFragment;
+import devs.southpaw.com.inspectionpro.myRigLayout.MyRigFragment;
 import layout.InspectionAddActivity;
 import layout.InspectionFragment;
-import objects.Inspection;
 
-public class MainActivity extends AppCompatActivity implements InspectionFragment.OnFragmentInteractionListener, ArchiveFragment.OnFragmentInteractionListener, ActionItemsFragment.OnFragmentInteractionListener, AccountFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements InspectionFragment.OnFragmentInteractionListener, ArchiveFragment.OnFragmentInteractionListener, ActionItemsFragment.OnFragmentInteractionListener, AccountFragment.OnFragmentInteractionListener, MyRigFragment.OnFragmentInteractionListener{
 
     private int mSelectedItem;
     private BottomNavigationView mBottomNav;
     private Toolbar toolbar;
+    private TextView titleToolbar;
     private static final String SELECTED_ITEM = "arg_selected_item";
     private int REQUEST_CODE = 100;
     public Drawer result;
+    private AccountHeader headerResult;
+    //if you want to update the items at a later time it is recommended to keep it in a variable
+    PrimaryDrawerItem inspecItem = new PrimaryDrawerItem().withIdentifier(1).withName("Inspections").withIcon(GoogleMaterial.Icon.gmd_check);
+    PrimaryDrawerItem myRigItem = new PrimaryDrawerItem().withIdentifier(3).withName("My Rig (developing)").withIcon(GoogleMaterial.Icon.gmd_home);
+    PrimaryDrawerItem accountItem = new PrimaryDrawerItem().withIdentifier(2).withName("Account").withIcon(GoogleMaterial.Icon.gmd_person);
+    PrimaryDrawerItem settingsItem = new PrimaryDrawerItem().withIdentifier(4).withName("Settings (developing)").withIcon(GoogleMaterial.Icon.gmd_settings);
+    PrimaryDrawerItem helpItem = new PrimaryDrawerItem().withIdentifier(5).withName("Help & feedback (developing)").withIcon(GoogleMaterial.Icon.gmd_help);
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener = new BottomNavigationView.OnNavigationItemSelectedListener() {
         @Override
@@ -102,11 +109,11 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
 
         mBottomNav = (BottomNavigationView) findViewById(R.id.bottomNavigation);
         mBottomNav.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        titleToolbar = (TextView) findViewById(R.id.title_toolbar);
         //create the drawer and remember the `Drawer` result object
         toolbar = (Toolbar) findViewById(R.id.toolbar);
 
@@ -152,19 +159,29 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
     }
 
     private void selectFragment(MenuItem item) {
+        Boolean admin = SharedPrefUtil.getAdminRights(this);
+
         Fragment frag = null;
         // init corresponding fragment
         switch (item.getItemId()) {
             case R.id.navigation_inspection:
-                frag = InspectionFragment.newInstance("title", "inspection");
+                frag = InspectionFragment.newInstance("title", "inspection", admin);
+
+                UIUtil.setStatusAndActionBarPrimaryColor(this, toolbar);
                 toolbar.getMenu().clear();
-                toolbar.inflateMenu(R.menu.inspection_menu);
+                if (admin == true) {
+                    toolbar.inflateMenu(R.menu.inspection_menu);
+                }
                 break;
             case R.id.navigation_action:
                 frag = ActionItemsFragment.newInstance("title", "action");
+
+                UIUtil.setStatusAndActionBarDeepOrangeColor(this, toolbar);
                 toolbar.getMenu().clear();
                 break;
             case R.id.navigation_archives:
+
+                UIUtil.setStatusAndActionBarPrimaryColor(this, toolbar);
                 toolbar.getMenu().clear();
                 frag = ArchiveFragment.newInstance("title", "archives");
                 break;
@@ -174,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         mSelectedItem = item.getItemId();
 
         updateToolbarText(item.getTitle());
-        updateToolbarTitle(item.getTitle());
 
         if (frag != null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -187,24 +203,34 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
     private void selectFragmentFromDrawer(long id) {
         Fragment frag = null;
         // init corresponding fragment
+        //handle USER AVAILABITY
+        Boolean admin = SharedPrefUtil.getAdminRights(this);
 
         switch ((int) id){
             case 1:
                 //main
-                frag = InspectionFragment.newInstance("title", "inspection");
+                frag = InspectionFragment.newInstance("title", "inspection",admin);
                 toolbar.getMenu().clear();
-                toolbar.inflateMenu(R.menu.inspection_menu);
+                updateToolbarText("Inspection");
+                if (admin == true) {
+                    toolbar.inflateMenu(R.menu.inspection_menu);
+                }
                 mBottomNav.setVisibility(View.VISIBLE);
                 break;
 
             case 2:
                 frag = AccountFragment.newInstance("title", "account");
+                updateToolbarText("Account");
                 toolbar.getMenu().clear();
                 mBottomNav.setVisibility(View.GONE);
                 break;
 
             case 3:
                 //my rig
+                frag = MyRigFragment.newInstance("title", "My Rig");
+                toolbar.getMenu().clear();
+                updateToolbarText("My Rig");
+                mBottomNav.setVisibility(View.GONE);
                 break;
             case 4:
                 //main
@@ -212,9 +238,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
 
             case 5:
                 break;
-
         }
-
 
         if (frag != null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -224,16 +248,9 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         }
     }
 
-    private void updateToolbarTitle(CharSequence text) {
-        TextView title = (TextView) findViewById(R.id.title_toolbar);
-        title.setText(text);
-    }
-
     private void updateToolbarText(CharSequence text) {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(text);
-        }
+
+        titleToolbar.setText(text);
     }
 
     public void handleNavigationDrawer(){
@@ -243,12 +260,11 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
 
-        //if you want to update the items at a later time it is recommended to keep it in a variable
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Inspections");
-
+        //handle USER AVAILABITY
+        Boolean admin = SharedPrefUtil.getAdminRights(this);
 
         // Create the AccountHeader
-        AccountHeader headerResult = new AccountHeaderBuilder()
+        headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.color.colorPrimaryDark)
                 .withSelectionListEnabledForSingleProfile(false)
@@ -263,7 +279,37 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                 })
                 .build();
 
-        result = new DrawerBuilder()
+        if (admin == true){
+            result = buildAdminDrawer(result);
+        }else{
+            result = buildNormalDrawer(result);
+        }
+
+         //to update only the name, badge, icon you can also use one of the quick methods
+        //result.updateName(1, "A name");
+
+        //the result object also allows you to add new items, remove items, add footer, sticky footer, ..
+        result.addItem(new DividerDrawerItem());
+        result.addStickyFooterItem(new PrimaryDrawerItem().withName("Log Out").withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+
+                //log out
+                FirebaseAuth.getInstance().signOut();
+
+                SharedPrefUtil.logOutRemoveSharedPref(activity);
+
+                Intent loginIntent = new Intent(getBaseContext(), SplashScreenActivity.class);
+                loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(loginIntent);
+
+                return  true;
+            }
+        }));
+    }
+
+    private Drawer buildAdminDrawer(Drawer drawer){
+        drawer = new DrawerBuilder()
                 .withAccountHeader(headerResult)
                 .withActivity(this)
                 .withToolbar(toolbar)
@@ -271,14 +317,59 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                 .withActionBarDrawerToggleAnimated(true)
                 .withSliderBackgroundColor(Color.parseColor("#FFFFFF"))
                 .addDrawerItems(
-                        item1.withIcon(GoogleMaterial.Icon.gmd_check),
-                        new PrimaryDrawerItem().withIdentifier(3).withName("My Rig (developing)").withIcon(GoogleMaterial.Icon.gmd_home),
-                        new PrimaryDrawerItem().withIdentifier(2).withName("Account").withIcon(GoogleMaterial.Icon.gmd_person),
+                        inspecItem,
+                        myRigItem,
+                        accountItem,
                         new DividerDrawerItem(),
-                        new PrimaryDrawerItem().withIdentifier(4).withName("Settings (developing)").withIcon(GoogleMaterial.Icon.gmd_settings),
-                        new PrimaryDrawerItem().withIdentifier(5).withName("Help & feedback (developing)").withIcon(GoogleMaterial.Icon.gmd_help)
-                )
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                        settingsItem,
+                        helpItem
+                ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                // do something with the clicked item :D
+                long id = drawerItem.getIdentifier();
+                if (id == 1) {
+                    //inspection fragment / main activity
+                    selectFragmentFromDrawer(id);
+                    return true;
+                }else if (id == 2){
+                    //account fragment
+                    selectFragmentFromDrawer(id);
+                    return  true;
+                }else if (id == 3){
+                    //my rig fragment (only for admin)
+                    selectFragmentFromDrawer(id);
+                    return  true;
+                }else if (id == 4){
+                    //settings fragment
+                    return false;
+                }else if (id == 5) {
+                    //help and feedback fragment
+                    return false;
+                }else{
+                    return false;
+                }
+            }
+        })
+                .build();
+        return drawer;
+    }
+
+    private Drawer buildNormalDrawer(Drawer drawer){
+        drawer = new DrawerBuilder()
+                .withAccountHeader(headerResult)
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .withActionBarDrawerToggle(true)
+                .withActionBarDrawerToggleAnimated(true)
+                .withSliderBackgroundColor(Color.parseColor("#FFFFFF"))
+                .addDrawerItems(
+                        inspecItem,
+                        accountItem,
+                        new DividerDrawerItem(),
+                        settingsItem,
+                        helpItem
+                ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         // do something with the clicked item :D
@@ -308,28 +399,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                 })
                 .build();
 
-         //to update only the name, badge, icon you can also use one of the quick methods
-        //result.updateName(1, "A name");
-
-        //the result object also allows you to add new items, remove items, add footer, sticky footer, ..
-        result.addItem(new DividerDrawerItem());
-        result.addStickyFooterItem(new PrimaryDrawerItem().withName("Log Out").withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-
-                //log out
-                FirebaseAuth.getInstance().signOut();
-
-                SharedPrefUtil.removePropertyID(activity);
-
-                Intent loginIntent = new Intent(getBaseContext(), SplashScreenActivity.class);
-                loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(loginIntent);
-
-                return  true;
-            }
-        }));
-
+        return drawer;
     }
 
 

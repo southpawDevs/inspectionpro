@@ -1,127 +1,211 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.chauthai.swipereveallayout.SwipeRevealLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/recycler_inspection_layout"
-    android:orientation="vertical">
+    android:id="@+id/swipe_action_item_layout"
+    app:dragEdge="right"
+    app:mode="same_level">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:elevation="5dp"
-        app:cardCornerRadius="5dp"
-        app:cardUseCompatPadding="true"
-        android:layout_gravity="center"
-        android:id="@+id/card_view_action_items">
+    <FrameLayout
+        android:id="@+id/done_layout_ai"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/colorStatusGreen">
 
         <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:background="@color/colorStatusGreen">
+
+                <com.mikepenz.iconics.view.IconicsImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
+                    android:id="@+id/done_image_view"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="130dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:background="@color/colorDeepOrange">
+
+                <com.mikepenz.iconics.view.IconicsImageView
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:layout_gravity="center"
+                    android:id="@+id/snapshot_image_view"
+                    android:src="@drawable/ic_photo_black_24dp"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/front_layout_ai"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/title_action_item_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginTop="10dp"
-                android:fontFamily="@font/oxygen_bold"
-                android:text="SHEAVE HANGAR"
-                android:textAlignment="textStart"
-                android:textColor="@color/colorBlack"
-                android:textSize="16sp"
-                android:textStyle="normal" />
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:elevation="5dp"
+            app:cardCornerRadius="10dp"
+            app:cardUseCompatPadding="true"
+            android:layout_gravity="center"
+            android:id="@+id/card_view_action_items">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginBottom="10dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/action_items_image_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="140dp"
-                    android:layout_weight="1"
-                    android:scaleType="center"
-                    android:background="@color/colorLightGrey"/>
-
-                <ProgressBar
-                    android:id="@+id/actionItemProgressBar"
-                    android:layout_width="100dp"
-                    android:layout_height="35dp"
-                    android:layout_gravity="center"
-                    />
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/description_action_item_tv"
+                    android:id="@+id/title_action_item_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="0dp"
+                    android:layout_marginLeft="20dp"
                     android:layout_marginRight="20dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_weight="2"
-                    android:fontFamily="@font/oxygen_bold"
-                    android:text="Please replace nuts"
+                    android:layout_marginTop="10dp"
+                    android:fontFamily="@font/comfortaa_bold"
+                    android:text="Sheave Hangar"
                     android:textAlignment="textStart"
-                    android:textColor="@color/colorStatusRed"
-                    android:textSize="16sp"
+                    android:textColor="@color/colorDarkDeepOrange"
+                    android:textSize="18sp"
                     android:textStyle="normal" />
+
+                <TextView
+                    android:id="@+id/inspection_category_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:fontFamily="@font/comfortaa_bold"
+                    android:text="Inspection: Pre Up Drops"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/colorDarkDeepOrange"
+                    android:textSize="14sp"
+                    android:textStyle="normal" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@color/colorDarkDeepOrange">
+
+                </View>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp">
+
+                    <android.support.v7.widget.CardView
+                        android:id="@+id/ai_image_card_view"
+                        android:layout_width="100dp"
+                        android:layout_height="80dp"
+                        android:layout_alignParentStart="true"
+                        app:cardCornerRadius="8dp">
+
+                        <ImageView
+                            android:id="@+id/action_items_image_view"
+                            android:layout_width="100dp"
+                            android:layout_height="80dp"
+                            android:background="@color/colorLightGrey"
+                            android:scaleType="center" />
+
+                    </android.support.v7.widget.CardView>
+
+                    <ProgressBar
+                        android:id="@+id/actionItemProgressBar"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="25dp" />
+
+                    <com.mikepenz.iconics.view.IconicsImageView
+                        android:id="@+id/report_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_toEndOf="@id/ai_image_card_view"
+                        android:tint="@color/colorGrey"
+                        app:iiv_icon="gmd-assignment" />
+
+                    <TextView
+                        android:id="@+id/description_action_item_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="10dp"
+
+                        android:layout_toEndOf="@id/report_icon"
+                        android:fontFamily="@font/oxygen"
+                        android:text="Please replace nuts"
+                        android:textAlignment="textStart"
+                        android:textColor="@color/colorLightBlack"
+                        android:textSize="15sp"
+                        android:textStyle="normal" />
+                </LinearLayout>
+
+
+                <TextView
+                    android:id="@+id/reported_at_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:fontFamily="@font/oxygen"
+                    android:text="Reported at: 23 January 2018"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/colorLightBlack"
+                    android:textSize="13sp"
+                    android:textStyle="normal" />
+
+                <TextView
+                    android:id="@+id/reported_by_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:fontFamily="@font/oxygen"
+                    android:text="Reported by: username"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/colorDarkGrey"
+                    android:textSize="13sp"
+                    android:textStyle="normal" />
+
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/inspection_category_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:fontFamily="@font/oxygen_light"
-                android:text="Inspection: Pre Up Drops"
-                android:textAlignment="textStart"
-                android:textColor="@color/colorBlack"
-                android:textSize="16sp"
-                android:textStyle="normal"/>
+        </android.support.v7.widget.CardView>
 
-            <TextView
-                android:id="@+id/reported_at_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:fontFamily="@font/oxygen_light"
-                android:text="Reported at: 23 January 2018"
-                android:textAlignment="textStart"
-                android:textColor="@color/colorBlack"
-                android:textSize="16sp"
-                android:textStyle="normal"/>
-
-            <TextView
-                android:id="@+id/reported_by_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:fontFamily="@font/oxygen_light"
-                android:text="Reported by: username"
-                android:textAlignment="textStart"
-                android:textColor="@color/colorBlack"
-                android:textSize="16sp"
-                android:textStyle="normal"/>
-
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
+    </FrameLayout>
 
 
-</LinearLayout>
+</com.chauthai.swipereveallayout.SwipeRevealLayout>

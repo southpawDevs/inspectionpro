@@ -32,7 +32,10 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -53,7 +56,9 @@ import objects.User;
  * Created by keith on 08/03/2018.
  */
 
-public class FirebaseUtil {
+public class FirebaseUtil extends FirebaseInstanceIdService {
+
+    private static final String TAG = "MyFirebaseIIDService";
 
     static String TAG_Firestore = "Firestore";
 
@@ -65,6 +70,8 @@ public class FirebaseUtil {
     static StorageReference storageRef = storage.getReference();
 
     static String assignedPropertyID;
+    static Boolean adminRights;
+    static Boolean develeporRights;
 
     static Boolean imageUploadSuccess;
 
@@ -72,13 +79,30 @@ public class FirebaseUtil {
         throw new AssertionError();
     }
 
+    @Override
+    public void onTokenRefresh() {
+        super.onTokenRefresh();
+
+        // Get updated InstanceID token.
+        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+        Log.d(TAG, "Refreshed token: " + refreshedToken);
+
+        // If you want to send messages to this application instance or
+        // manage this apps subscriptions on the server side, send the
+        // Instance ID token to your app server.
+        sendRegistrationToServer(refreshedToken);
+    }
+
+    private void sendRegistrationToServer(String token) {
+        // TODO: Implement this method to send token to your app server.
+    }
 
     //Firebase Auth User
     public static FirebaseUser getFirebaseUser(){
         return user;
     }
 
-    public static void savePropertyIDFromUser(final Context context){
+    public static void saveDataToSharedPref(final Context context){
 
         db.collection("users").document(user.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -90,11 +114,15 @@ public class FirebaseUtil {
 
                         User user = document.toObject(User.class);
                         assignedPropertyID = user.getAssigned_property();
+                        adminRights = user.getAdmin_rights();
+                        develeporRights = user.getDeveloper_rights();
 
                         SharedPreferences sharedPref = SharedPrefUtil.getSharedPreferences(context);
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putString(context.getString(R.string.property_id_key), assignedPropertyID);
-                        editor.commit();
+                        editor.putBoolean(context.getString(R.string.admin_rights_key), adminRights);
+                        editor.putBoolean(context.getString(R.string.developer_rights_key), develeporRights);
+                        editor.apply();
                     } else {
                         Log.d(TAG_Firestore, "No such document");
                     }
@@ -103,6 +131,15 @@ public class FirebaseUtil {
                 }
             }
         });
+    }
+
+    public static void registerPropertyToSharedPref(final Context context, String pid){
+
+        SharedPreferences sharedPref = SharedPrefUtil.getSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(context.getString(R.string.property_id_key), pid);
+        editor.commit();
+
     }
 
     //FIRESTORE
@@ -117,6 +154,11 @@ public class FirebaseUtil {
         return propertyRef;
     }
 
+    public static CollectionReference getDepartmentsFromFirestore(Activity activity){
+
+        CollectionReference departmentRef = getPropertyRefFromFirestore(activity).collection("departments");
+        return departmentRef;
+    }
 
     public static CollectionReference getUsersFromFirestore(){
 
@@ -170,6 +212,19 @@ public class FirebaseUtil {
         return  inspectionsColl.document(inspectionID).collection("items").document(itemID);
     }
 
+    public static DocumentReference getActionItem(final Activity activity, String aiID){
+
+        final CollectionReference inspectionsColl = getPropertyRefFromFirestore(activity).collection("actionItems");
+
+        return  inspectionsColl.document(aiID);
+    }
+
+    public static DocumentReference getMembersFromProperty(final Activity activity, String uid){
+
+        final DocumentReference membersColl = getPropertyRefFromFirestore(activity).collection("allMembers").document(uid);
+
+        return  membersColl;
+    }
 
 
     //FIREBASE STORAGE

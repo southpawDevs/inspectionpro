@@ -3,12 +3,14 @@ package adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +24,8 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
+import com.chauthai.swipereveallayout.SwipeRevealLayout;
+import com.chauthai.swipereveallayout.ViewBinderHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -31,6 +35,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.view.IconicsImageView;
 
 import java.lang.annotation.Target;
 import java.util.List;
@@ -40,6 +46,7 @@ import javax.sql.DataSource;
 import devs.southpaw.com.inspectionpro.FirebaseUtil;
 import devs.southpaw.com.inspectionpro.UIUtil;
 import devs.southpaw.com.inspectionpro.R;
+import devs.southpaw.com.inspectionpro.actionItemsLayout.ActionItemsDetailActivity;
 import layout.ItemDetailsActivity;
 import objects.ActionItems;
 import objects.InspectionItem;
@@ -54,6 +61,8 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
     final private RecyclerViewAdapterForItem.RecyclerItemClickListener mOnClickListener;
     private Context mContext;
     private Activity mActivity;
+
+    private final ViewBinderHelper viewBinderHelper = new ViewBinderHelper();
 
     public interface RecyclerItemClickListener {
         void onListItemClick(int clickedItemIndex);
@@ -85,12 +94,14 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
         String reportedDate = UIUtil.getStringDateFromDate(selecteditem.getItem_reported_at());
         holder.reportedAt.setText("Reported At: " + reportedDate);
         holder.reportedBy.setText("Reported By: " + selecteditem.getItem_reported_by());
+        holder.reportedBy.setVisibility(View.GONE);
 
         StorageReference pathReference = FirebaseUtil.getStorageRef(mActivity);
         StorageReference imageLocation = pathReference.child("images/temp_" + selecteditem.getItem_existing_id());
 
         holder.descriptionActionItem.setText(selecteditem.getItem_report_description());
 
+        holder.aiImageCard.setVisibility(View.GONE);
         holder.actionImageView.setVisibility(View.GONE);
         holder.progressBar.setVisibility(View.VISIBLE);
 
@@ -100,12 +111,17 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
                 // Got the download URL for 'users/me/profile.png'
                 String urlImage = uri.toString();
 
+                holder.aiImageCard.setVisibility(View.VISIBLE);
                 holder.actionImageView.setVisibility(View.VISIBLE);
-                holder.lp.setMargins(10,0,0,0);
+                //holder.lp.setMargins(15,0,0,0);
 
-                Glide.with(mContext).load(urlImage).override(1000,700).fitCenter().listener(new RequestListener<String, GlideDrawable>() {
+               // holder.lp.addRule(RelativeLayout.END_OF, R.id.actionItemProgressBar);
+              //  holder.descriptionActionItem.setLayoutParams(holder.lp);
+
+                Glide.with(mContext).load(urlImage).override(500,300).centerCrop().listener(new RequestListener<String, GlideDrawable>() {
                     @Override
                     public boolean onException(Exception e, String model, com.bumptech.glide.request.target.Target<GlideDrawable> target, boolean isFirstResource) {
+                        holder.aiImageCard.setVisibility(View.GONE);
                         holder.actionImageView.setVisibility(View.GONE);
                         holder.progressBar.setVisibility(View.GONE);
 
@@ -114,6 +130,9 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, com.bumptech.glide.request.target.Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                       // holder.lp.addRule(RelativeLayout.END_OF, R.id.action_items_image_view);
+                       // holder.descriptionActionItem.setLayoutParams(holder.lp);
+                        holder.aiImageCard.setVisibility(View.VISIBLE);
                         holder.actionImageView.setVisibility(View.VISIBLE);
                         holder.progressBar.setVisibility(View.GONE);
                         return false;
@@ -127,12 +146,14 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
             public void onFailure(@NonNull Exception exception) {
                 // Handle any errors
                 holder.progressBar.setVisibility(View.GONE);
+                holder.aiImageCard.setVisibility(View.GONE);
                 holder.actionImageView.setVisibility(View.GONE);
-                holder.lp.setMargins(0,0,0,0);
+                //holder.lp.setMargins(0,0,0,0);
             }
         });
 
-
+        ActionItems dataObject = actionItemsData.get(position);
+        viewBinderHelper.bind(holder.swipeRevealLayout, dataObject.getItem_existing_id());
     }
 
     @Override
@@ -153,13 +174,19 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
         public TextView reportedBy;
         public TextView inspectionCategory;
         public CardView cardBackground;
+        public CardView aiImageCard;
         public ImageView actionImageView;
-        public LinearLayout.LayoutParams lp;
+        public RelativeLayout.LayoutParams lp;
         public ProgressBar progressBar;
-
+        private View frontLayout;
+        private View doneLayout;
+        public SwipeRevealLayout swipeRevealLayout;
         private final Context context;
+        public IconicsImageView reportIcon;
 
-        public ViewHolder(View itemLayoutView) {
+        private IconicsImageView doneIV;
+
+        public ViewHolder(final View itemLayoutView) {
             super(itemLayoutView);
 
             //populate viewholder data accordingly
@@ -171,11 +198,68 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
             actionImageView = itemLayoutView.findViewById(R.id.action_items_image_view);
             descriptionActionItem = itemLayoutView.findViewById(R.id.description_action_item_tv);
             progressBar = itemLayoutView.findViewById(R.id.actionItemProgressBar);
-
-            lp = (LinearLayout.LayoutParams) descriptionActionItem.getLayoutParams();
+            frontLayout = itemLayoutView.findViewById(R.id.front_layout_ai);
+            doneLayout = itemLayoutView.findViewById(R.id.done_layout_ai);
+           // lp = (RelativeLayout.LayoutParams) descriptionActionItem.getLayoutParams();
+            swipeRevealLayout = itemLayoutView.findViewById(R.id.swipe_action_item_layout);
+            aiImageCard = itemLayoutView.findViewById(R.id.ai_image_card_view);
+            doneIV = itemLayoutView.findViewById(R.id.done_image_view);
+            reportIcon = itemLayoutView.findViewById(R.id.report_icon);
 
             itemLayoutView.setOnClickListener(this);
             context = itemLayoutView.getContext();
+
+            swipeRevealLayout.setEnabled(false);
+
+            IconicsDrawable drawableReport = new IconicsDrawable(mContext)
+                    .icon(GoogleMaterial.Icon.gmd_assignment)
+                    .color(Color.GRAY)
+                    .sizeDp(20);
+
+            reportIcon.setIcon(drawableReport);
+            //reportIcon.setVisibility(View.GONE);
+
+            IconicsDrawable drawable = new IconicsDrawable(mContext)
+                    .icon(GoogleMaterial.Icon.gmd_done)
+                    .color(Color.WHITE)
+                    .sizeDp(24);
+            doneIV.setIcon(drawable);
+
+            //add listener for quick done
+            doneLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+//                    InspectionItem selectedItem = inspectionItemsData.get(position);
+//
+//                    String id = selectedItem.getItem_id();
+//
+//                    if (selectedItem.getItem_status() != 2) {
+//                        updateDoneStatusToFirebase(id, 2);
+//                    }
+//
+//                    viewBinderHelper.closeLayout(id);
+                }
+            });
+
+            frontLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    itemLayoutView.setClickable(false);
+
+                    final ActionItems ai = actionItemsData.get(getAdapterPosition());
+
+                    // Serialization
+                    Gson gson = new Gson();
+                    String itemJson = gson.toJson(ai);
+
+                    Intent intentItemDetail = new Intent(context, ActionItemsDetailActivity.class);
+                    intentItemDetail.putExtra("inspection_name", ai.getInspection_name());
+                    intentItemDetail.putExtra("inspection_id", ai.getInspection_id());
+                    intentItemDetail.putExtra("ai", itemJson);
+                    context.startActivity(intentItemDetail);
+                }
+            });
         }
 
         @Override
@@ -183,31 +267,15 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
 
             final ActionItems ai = actionItemsData.get(getAdapterPosition());
 
-            DocumentReference itemRef = FirebaseUtil.getInspectionItem(mActivity, ai.getInspection_id(), ai.getItem_existing_id());
+            // Serialization
+            Gson gson = new Gson();
+            String itemJson = gson.toJson(ai);
 
-            itemRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.getResult() != null){
-                        InspectionItem item = task.getResult().toObject(InspectionItem.class);
-
-                        // Serialization
-                        Gson gson = new Gson();
-                        String itemJson = gson.toJson(item);
-
-                        Intent intentItemDetail =  new Intent(context, ItemDetailsActivity.class);
-                        intentItemDetail.putExtra("inspection_name" , ai.getInspection_name());
-                        intentItemDetail.putExtra("inspection_id" , ai.getInspection_id());
-                        intentItemDetail.putExtra("selected_item" , itemJson);
-                        context.startActivity(intentItemDetail);
-                    }else{
-                        Toast.makeText(mContext, "Fail to retrieve item", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
-
-
+            Intent intentItemDetail = new Intent(context, ActionItemsDetailActivity.class);
+            intentItemDetail.putExtra("inspection_name", ai.getInspection_name());
+            intentItemDetail.putExtra("inspection_id", ai.getInspection_id());
+            intentItemDetail.putExtra("ai", itemJson);
+            context.startActivity(intentItemDetail);
         }
     }
 //    public void getInspectionNameToItemAdapter(String name, String id){

@@ -31,6 +31,9 @@
     </string>
 
     <string name="preference_file_key">"devs.southpaw.com.inspectionpro.PREFERENCE_KEY"</string>
-    <string name="property_id_key">"devs.southpaw.com.inspectionpro.PREFERENCE_KEY"</string>
-    <string name="default_property_id">"oNJZmUlwxGxAymdyKoIV"</string>
+    <string name="property_id_key">"property_id"</string>
+    <string name="admin_rights_key">"admin_rights"</string>
+    <string name="developer_rights_key">"developer_rights"</string>
+    <string name="default_property_id">""</string>
+    <string name="title_activity_action_items_detail">ActionItemsDetailActivity</string>
 </resources>

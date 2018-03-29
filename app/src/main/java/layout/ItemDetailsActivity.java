@@ -10,10 +10,12 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -23,29 +25,37 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.RotationOptions;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.view.IconicsImageView;
 import com.stfalcon.frescoimageviewer.ImageViewer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -53,7 +63,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import devs.southpaw.com.inspectionpro.FirebaseUtil;
 import devs.southpaw.com.inspectionpro.R;
+import devs.southpaw.com.inspectionpro.SharedPrefUtil;
+import devs.southpaw.com.inspectionpro.UIUtil;
 import objects.ActionItems;
 import objects.InspectionItem;
 
@@ -66,16 +79,33 @@ public class ItemDetailsActivity extends AppCompatActivity {
     private EditText itemComments;
     private TextView itemQuestion;
     private Button addConditionImageButton;
-    private Button updateCommentButton;
     private SimpleDraweeView snapshotImageView;
     InspectionItem selectedItem;
     String inspectionName;
     String inspectionID;
+    int pendingCount;
     private SimpleDraweeView itemImageView;
+    private ConstraintLayout constraintLayout;
+    private Activity mActivity;
+    MaterialDialog mDialog;
 
     private Button itemStatus0;
     private Button itemStatus1;
     private Button itemStatus2;
+
+    private CardView itemStatusSelect0;
+    private CardView itemStatusSelect1;
+    private CardView itemStatusSelect2;
+
+    private MaterialDialog mProgressDialog;
+
+    ImageView methodIcon;
+    ImageView conditionIcon;
+    IconicsImageView conditionImageIcon;
+    IconicsImageView commentIcon;
+
+
+    private InputMethodManager imm;
 
     private int REQUEST_CODE = 1880;
 
@@ -158,12 +188,18 @@ public class ItemDetailsActivity extends AppCompatActivity {
         this.sendBroadcast(mediaScanIntent);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_item_details);
+
+        mActivity = this;
+        mProgressDialog = new MaterialDialog.Builder(mActivity)
+                .title("Uploading image")
+                .content("please wait...")
+                .progress(true, 0)
+                .show();
+        mProgressDialog.dismiss();
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -177,11 +213,29 @@ public class ItemDetailsActivity extends AppCompatActivity {
         addConditionImageButton = (Button) findViewById(R.id.add_condition_image_button);
         snapshotImageView = (SimpleDraweeView) findViewById(R.id.snapshot_image_view);
         itemImageView = (SimpleDraweeView) findViewById(R.id.item_image_view);
-        updateCommentButton = (Button) findViewById(R.id.update_comment_button);
 
         itemStatus0 = (Button) findViewById(R.id.item_status_0);
         itemStatus1 = (Button) findViewById(R.id.item_status_1);
         itemStatus2 = (Button) findViewById(R.id.item_status_2);
+
+        itemStatusSelect0 = (CardView) findViewById(R.id.item_status_check_0);
+        itemStatusSelect1 = (CardView) findViewById(R.id.item_status_check_1);
+        itemStatusSelect2 = (CardView) findViewById(R.id.item_status_check_2);
+
+        IconicsDrawable icon= UIUtil.getGMD(this,GoogleMaterial.Icon.gmd_build, 20,2, R.color.colorDarkGrey);
+        IconicsDrawable iconSearch= UIUtil.getGMD(this,GoogleMaterial.Icon.gmd_search, 20,2, R.color.colorDarkGrey);
+
+        methodIcon = (ImageView) findViewById(R.id.method_icon);
+        methodIcon.setImageDrawable(icon);
+
+        conditionImageIcon = (IconicsImageView) findViewById(R.id.condition_image_icon);
+        conditionImageIcon.setIcon(UIUtil.getGMD(this, GoogleMaterial.Icon.gmd_photo, 20,0, R.color.colorPrimaryDark));
+
+        commentIcon = (IconicsImageView) findViewById(R.id.comment_image_icon);
+        commentIcon.setIcon(UIUtil.getGMD(this, GoogleMaterial.Icon.gmd_comment,20,0,R.color.primary_dark));
+
+        conditionIcon = (ImageView) findViewById(R.id.condition_icon);
+        conditionIcon.setImageDrawable(iconSearch);
 
         snapshotImageView.setVisibility(View.GONE);
         snapshotImageView.setOnClickListener(new View.OnClickListener() {
@@ -203,6 +257,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         String itemJson= getIntent().getStringExtra("selected_item");
         inspectionName = getIntent().getStringExtra("inspection_name");
         inspectionID = getIntent().getStringExtra("inspection_id");
+        pendingCount = getIntent().getIntExtra("inspected_count",0);
         Log.d("itemJson", itemJson);
 
         Gson gson = new Gson();
@@ -228,21 +283,13 @@ public class ItemDetailsActivity extends AppCompatActivity {
                 .paddingDp(15);
         addConditionImageButton.setBackground(cameraIcon);
 
-        updateCommentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                uploadCommentsToFirebase(selectedItem.getItem_id(), itemComments.getText().toString());
-            }
-        });
-
         itemComments.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     // do something, e.g. set your TextView here via .setText()
-                    InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    uploadCommentsToFirebase(selectedItem.getItem_id(), itemComments.getText().toString());
                     return true;
                 }
                 return false;
@@ -252,29 +299,64 @@ public class ItemDetailsActivity extends AppCompatActivity {
         itemStatus0.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateStatusToFirestore(selectedItem.getItem_id(), 0);
+                if (selectedItem.getItem_status() == 0) {
+                    Toast.makeText(getBaseContext(), "already unchecked", Toast.LENGTH_SHORT).show();
+                }else {
+                    updateStatusToFirestore(selectedItem.getItem_id(), 0, itemComments.getText().toString());
+                }
             }
         });
 
         itemStatus1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateStatusToFirestore(selectedItem.getItem_id(), 1);
+                if (selectedItem.getItem_status() == 1) {
+                    Toast.makeText(getBaseContext(), "already red", Toast.LENGTH_SHORT).show();
+                }else {
+                    updateStatusToFirestore(selectedItem.getItem_id(), 1, itemComments.getText().toString());
+                }
             }
         });
 
         itemStatus2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateStatusToFirestore(selectedItem.getItem_id(), 2);
+                if (selectedItem.getItem_status() == 2) {
+                    Toast.makeText(getBaseContext(), "already green", Toast.LENGTH_SHORT).show();
+                }else {
+                    updateStatusToFirestore(selectedItem.getItem_id(), 2, itemComments.getText().toString
+                            ());
+                }
             }
         });
 
+//set status selection
+        switch (selectedItem.getItem_status()){
+            case 0 :
+                itemStatusSelect0.setVisibility(View.VISIBLE);
+                itemStatusSelect1.setVisibility(View.INVISIBLE);
+                itemStatusSelect2.setVisibility(View.INVISIBLE);
+                break;
+            case 1 :
+                itemStatusSelect1.setVisibility(View.VISIBLE);
+                itemStatusSelect0.setVisibility(View.INVISIBLE);
+                itemStatusSelect2.setVisibility(View.INVISIBLE);
+                break;
+            case 2 :
+                itemStatusSelect2.setVisibility(View.VISIBLE);
+                itemStatusSelect1.setVisibility(View.INVISIBLE);
+                itemStatusSelect0.setVisibility(View.INVISIBLE);
+                break;
+            default:break;
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.items_detail_menu, menu);
+        Boolean admin = SharedPrefUtil.getAdminRights(this);
+        if(admin == true) {
+            getMenuInflater().inflate(R.menu.items_detail_menu, menu);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -330,10 +412,18 @@ public class ItemDetailsActivity extends AppCompatActivity {
         String comment = selectedItem.getItem_comments();
         String question = selectedItem.getItem_check_question();
 
+        itemComments.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                itemComments.setCursorVisible(true);
+                return false;
+            }
+        });
+
         itemTitle.setText(name);
-        itemDescription.setText("-" + description);
-        itemMethod.setText("-" + method);
-        itemCondition.setText("Condition: " + condition);
+        itemDescription.setText(description);
+        itemMethod.setText(method);
+        itemCondition.setText(condition);
         itemComments.setText(comment);
         itemQuestion.setText(question);
 
@@ -346,7 +436,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         String conditionImageUrl = selectedItem.getItem_condition_photo();
 
         if (conditionImageUrl != null){
-            Glide.with(this).load(conditionImageUrl).override(200,200).fitCenter().into(snapshotImageView);
+            Glide.with(this).load(conditionImageUrl).centerCrop().into(snapshotImageView);
             snapshotImageView.setVisibility(View.VISIBLE);
         }else{
             snapshotImageView.setVisibility(View.GONE);
@@ -404,6 +494,18 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
                 return;
             }
+        })
+        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+
+                double progress = 100.0 * (taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                System.out.println("Upload is " + progress + "% done");
+                int totalBytes = (int) taskSnapshot.getTotalByteCount();
+                int currentprogress = (int) progress;
+
+                //showProgress(currentprogress, totalBytes );
+            }
         });
     }
 
@@ -424,14 +526,16 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(Void aVoid) {
                             hideKeyboard();
-                            itemComments.clearFocus();
+                            itemComments.setCursorVisible(true);
+                           itemComments.setFocusable(false);
+
                             Toast.makeText(getBaseContext(), "comments updated", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            itemComments.clearFocus();
+                            itemComments.setCursorVisible(true);
                             hideKeyboard();
                             Toast.makeText(getBaseContext(), "fail to upload comment", Toast.LENGTH_SHORT).show();
                         }
@@ -442,7 +546,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void updateStatusToFirestore(String item_id, int status){
+    private void updateStatusToFirestore(String item_id, final int status, String comments){
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
@@ -452,6 +556,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         //update firestore inspection item
         itemsColl.document(item_id)
                 .update("item_status", status,
+                        //"item_comments", comments,
                         "item_reported_at", new Date(),
                         "item_reported_by", user.getEmail()
                 )
@@ -459,36 +564,44 @@ public class ItemDetailsActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         hideKeyboard();
-                        itemComments.clearFocus();
+                        itemComments.setCursorVisible(true);
+
                         Toast.makeText(getBaseContext(), "status updated", Toast.LENGTH_SHORT).show();
+                        finish();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        itemComments.clearFocus();
+                        itemComments.setCursorVisible(true);
                         hideKeyboard();
                         Toast.makeText(getBaseContext(), "fail to update status", Toast.LENGTH_SHORT).show();
                     }
                 });
 
-        //update firestore Action Items
-        if (status == 1) {
-            //red
+        //update inspected count
+        if (selectedItem.getItem_status() == 0) {
 
-            final CollectionReference actionItemsColl = devHousePropertyDoc.collection("actionItems");
+            if (status != 0) {
+                //if current status is zero and is updating to other int (pending should decrease by 1)
+                inspectionsColl.document(inspectionID).update(
+                        "inspection_pending_count", pendingCount -= 1
+                );
+            } else {
 
-            //initailize action item
-            ActionItems actionItem = new ActionItems(item_id, selectedItem.getItem_name(), selectedItem.getItem_comments(), new Date(), user.getEmail(), selectedItem.getItem_condition_photo(), inspectionName, inspectionID);
+            }
 
-            actionItemsColl.document(selectedItem.getItem_id()).set(actionItem);
-            Toast.makeText(getBaseContext(), "added to action item", Toast.LENGTH_SHORT).show();
         }else{
-            final CollectionReference actionItemsColl = devHousePropertyDoc.collection("actionItems");
-            actionItemsColl.document(selectedItem.getItem_id()).delete();
-            Toast.makeText(getBaseContext(), "removed from action item", Toast.LENGTH_SHORT).show();
-        }
+            //if current status is either 1 or 2 and is updating to other int
+            if (status == 0) {
+                //(pending should increase by 1 after revert to normal state)
+                inspectionsColl.document(inspectionID).update(
+                        "inspection_pending_count", pendingCount += 1
+                );
+            } else {
 
+            }
+        }
     }
 
 
@@ -511,7 +624,6 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
                     }
                 });
-
     }
 
     public void hideKeyboard() {
@@ -545,6 +657,34 @@ public class ItemDetailsActivity extends AppCompatActivity {
                 .build();
 
         imageViewer.show();
+    }
+
+    private void showProgress(int currentProgress, int totalBytes){
+
+        boolean showMinMax = true;
+
+        mDialog = new MaterialDialog.Builder(getApplicationContext())
+                .title("Uploading Image")
+                .content("please wait")
+                .progress(false, totalBytes, showMinMax)
+                .show();
+
+        // Loop until the dialog's progress value reaches the max (150)
+        while (mDialog.getCurrentProgress() != mDialog.getMaxProgress()) {
+            // If the progress dialog is cancelled (the user closes it before it's done), break the loop
+            if (mDialog.isCancelled()) break;
+            // Wait 50 milliseconds to simulate doing work that requires progress
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                break;
+            }
+            // Increment the dialog's progress by 1 after sleeping for 50ms
+           mDialog.incrementProgress(1);
+        }
+
+// When the loop exits, set the dialog content to a string that equals "Done"
+        mDialog.setContent("Done");
     }
 
 

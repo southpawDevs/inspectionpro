@@ -17,13 +17,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.imagepipeline.common.RotationOptions;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.stfalcon.frescoimageviewer.ImageViewer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,6 +106,8 @@ public class ActionItemsFragment extends Fragment implements RecyclerViewAdapter
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_action_items, container, false);
+
+
 
         //handle pull refreshing container
         refreshContainer = (SwipeRefreshLayout) view.findViewById(R.id.refresh_container_action_items);
@@ -183,7 +190,7 @@ public class ActionItemsFragment extends Fragment implements RecyclerViewAdapter
         itemsAdapter = new RecyclerViewAdapterForActionItems(actionItemsData, getContext(), getActivity());
         CollectionReference actionItemsColl = FirebaseUtil.getActionItems(getActivity());
 
-        actionItemsColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        actionItemsColl.orderBy("item_reported_at", Query.Direction.DESCENDING).limit(40).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {

@@ -16,18 +16,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="2dp"
+            android:layout_marginTop="6dp"
             android:fontFamily="@font/oxygen"
             android:text="pull to refresh"
-            android:textSize="12dp"
-            android:textStyle="italic"
             android:textAlignment="center"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="10dp"/>
+            android:textColor="@color/colorGrey"
+            android:textSize="10sp" />
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="48dp"
+            android:paddingBottom="10dp"
             android:id="@+id/refresh_container">
 
             <android.support.v7.widget.RecyclerView

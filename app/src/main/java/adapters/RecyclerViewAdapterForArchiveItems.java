@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import org.json.JSONObject;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -23,7 +25,6 @@ import objects.InspectionItem;
  */
 
 public class RecyclerViewAdapterForArchiveItems extends RecyclerView.Adapter<RecyclerViewAdapterForArchiveItems.ViewHolder> {
-
 
     private List<Inspection> inspectionArchiveData;
 
@@ -58,7 +59,25 @@ public class RecyclerViewAdapterForArchiveItems extends RecyclerView.Adapter<Rec
 
         holder.inspectionSubmittedAt.setText("Submitted at: " + submittedDate);
         holder.inspectionSubmittedBy.setText("Submitted by: " + submittedBy);
-        //holder.itemSummary.setText();
+
+        List<InspectionItem> items = currentInspection.getInspection_items_object();
+
+        int totalRed = 0;
+        int totalGreen = 0;
+
+        for (int l = 0; l < items.size(); l++){
+            if (items.get(l).getItem_status() == 1){
+                totalRed += 1;
+            }else{
+                totalGreen += 1;
+            }
+        }
+
+        if (totalRed != 0) {
+            holder.itemSummary.setText(totalRed + " action items were found.");
+        }else{
+            holder.itemSummary.setText("No action items were found. Inspection is safe");
+        }
     }
 
     @Override

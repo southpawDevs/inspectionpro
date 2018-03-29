@@ -85,8 +85,6 @@ public class RecyclerViewAdapterForArchive extends RecyclerView.Adapter<Recycler
             //populate viewholder data accordingly
             inspectionTitle = itemLayoutView.findViewById(R.id.title_inspection_archive);
             cardBackground = itemLayoutView.findViewById(R.id.card_view_archive);
-            inspectionSubmitted = itemLayoutView.findViewById(R.id.submitted_inspection_archive);
-
             itemLayoutView.setOnClickListener(this);
             context = itemLayoutView.getContext();
         }

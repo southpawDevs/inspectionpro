@@ -1,6 +1,5 @@
 package adapters;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,14 +13,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.view.IconicsImageView;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import devs.southpaw.com.inspectionpro.R;
+import devs.southpaw.com.inspectionpro.UIUtil;
 import layout.InspectionDetailsActivity;
 import objects.Inspection;
 
@@ -32,6 +33,7 @@ import objects.Inspection;
 public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<RecyclerViewAdapterForInspection.ViewHolder> {
 
     private List<Inspection> inspectionsData;
+    Context mContext;
 
     final private RecyclerItemClickListener mOnClickListener;
 
@@ -40,9 +42,10 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
     }
 
-    public RecyclerViewAdapterForInspection(List<Inspection> inspectionsData) {
+    public RecyclerViewAdapterForInspection(List<Inspection> inspectionsData, Context context) {
         this.inspectionsData = inspectionsData;
         mOnClickListener = null;
+        mContext = context;
     }
 
     public RecyclerViewAdapterForInspection(List<Inspection> inspectionsData, RecyclerItemClickListener mOnClickListener) {
@@ -120,9 +123,17 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
                 dueInText = handleDueInText(hoursRemaining);
                 holder.inspectionTitle.setTextColor(Color.parseColor("#333333"));
                 holder.inspectionLastChecked.setTextColor(Color.parseColor("#333333"));
+                holder.inspectionOverdue.setTextColor(Color.parseColor("#333333"));
                 holder.inspectionItemsCount.setTextColor(Color.parseColor("#333333"));
+
+                holder.countIcon.setIcon(UIUtil.getGMD(mContext, GoogleMaterial.Icon.gmd_search,15,0,R.color.colorDarkGrey));
+
+                holder.lastIcon.setIcon(UIUtil.getGMD(mContext, GoogleMaterial.Icon.gmd_alarm_on,15,0,R.color.colorDarkGrey));
+
+                holder.timeIcon.setIcon(UIUtil.getGMD(mContext, GoogleMaterial.Icon.gmd_schedule,15,0,R.color.colorDarkGrey));
+                holder.cardBackground.setBackgroundResource(R.drawable.gradient_normal_bg);
             }else{
-                holder.cardBackground.setCardBackgroundColor(Color.parseColor("#fa4048"));
+                holder.cardBackground.setBackgroundResource(R.drawable.gradient_red_bg);
                 holder.inspectionReady.setVisibility(View.GONE);
 
 //                holder.inspectionTitle.setTextColor(R.color.colorPrimaryWhite);
@@ -134,12 +145,12 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
         }
 
-        holder.inspectionLastChecked.setText(dueInText + ", last checked: " + lastChecked);
+        holder.inspectionLastChecked.setText("last checked: " + lastChecked);
+        holder.inspectionOverdue.setText(dueInText);
 
         //set item count
-        List<String> itemsArray= new ArrayList<>();
-        String totalCounts  = String.valueOf(currentInspection.getInspection_items_count());
-        holder.inspectionItemsCount.setText(totalCounts + " more items to inspect");
+        String totalCounts  = String.valueOf(currentInspection.getInspection_pending_count());
+        holder.inspectionItemsCount.setText(totalCounts + " items to inspect");
     }
 
     @Override
@@ -156,9 +167,13 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
         public TextView inspectionTitle;
         public TextView inspectionLastChecked;
+        public TextView inspectionOverdue;
         public TextView inspectionReady;
         public TextView inspectionItemsCount;
         public CardView cardBackground;
+        public IconicsImageView timeIcon;
+        public IconicsImageView lastIcon;
+        public IconicsImageView countIcon;
 
         private final Context context;
 
@@ -171,6 +186,17 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
             inspectionReady =itemLayoutView.findViewById(R.id.ready_inspection);
             cardBackground = itemLayoutView.findViewById(R.id.card_view);
             inspectionItemsCount = itemLayoutView.findViewById(R.id.no_items_inspection);
+            timeIcon = itemLayoutView.findViewById(R.id.inspection_time_icon);
+            lastIcon = itemLayoutView.findViewById(R.id.inspection_checked_icon);
+            inspectionOverdue = itemLayoutView.findViewById(R.id.overdue_inspection_text_view);
+            countIcon = itemLayoutView.findViewById(R.id.count_icon);
+
+            countIcon.setIcon(UIUtil.getGMD(mContext, GoogleMaterial.Icon.gmd_search,15,0,R.color.colorPrimaryWhite));
+
+            lastIcon.setIcon(UIUtil.getGMD(mContext, GoogleMaterial.Icon.gmd_alarm_on,15,0,R.color.colorPrimaryWhite));
+
+
+            timeIcon.setIcon(UIUtil.getGMD(mContext, GoogleMaterial.Icon.gmd_schedule,15,0,R.color.colorPrimaryWhite));
 
             itemLayoutView.setOnClickListener(this);
             context = itemLayoutView.getContext();

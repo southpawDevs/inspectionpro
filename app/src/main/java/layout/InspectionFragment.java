@@ -3,6 +3,7 @@ package layout;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -23,7 +24,9 @@ import android.widget.Toast;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -33,13 +36,22 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import devs.southpaw.com.inspectionpro.FirebaseUtil;
+import devs.southpaw.com.inspectionpro.MainActivity;
 import devs.southpaw.com.inspectionpro.R;
 import adapters.RecyclerViewAdapterForInspection;
+import devs.southpaw.com.inspectionpro.SharedPrefUtil;
 import objects.Inspection;
 import objects.InspectionItem;
+import objects.User;
 
 
 /**
@@ -52,16 +64,18 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private static final String ARG_ADMIN = "admin";
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private Boolean mParamAdmin;
 
     private LinearLayoutManager mLayoutManager;
     private RecyclerViewAdapterForInspection inspectionAdapter;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshContainer;
 
+    private Boolean adminRights;
 
     private Boolean refreshing = false;
 
@@ -78,11 +92,12 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
      * @return A new instance of fragment InspectionFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static InspectionFragment newInstance(String param1, String param2) {
+    public static InspectionFragment newInstance(String param1, String param2, Boolean admin) {
         InspectionFragment fragment = new InspectionFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
+        args.putBoolean(ARG_ADMIN, admin);
         fragment.setArguments(args);
         return fragment;
     }
@@ -93,6 +108,7 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+            mParamAdmin = getArguments().getBoolean(ARG_ADMIN);
         }
     }
 
@@ -109,7 +125,18 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
             @Override
             public void onRefresh() {
                 refreshing = true;
-                getInspectionDataFromFireStore(refreshing);
+
+                FirebaseUser user = FirebaseUtil.getFirebaseUser();
+
+                DocumentReference member = FirebaseUtil.getMembersFromProperty(getActivity(), user.getUid());
+                member.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        String depID = documentSnapshot.getString("department_id");
+                        getInspectionDataFromFireStore(refreshing, depID);
+                    }
+                });
+
             }
         });
 
@@ -123,15 +150,22 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
         mLayoutManager = new LinearLayoutManager(this.getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
 
-        getInspectionDataFromFireStore(refreshing);
-
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        getInspectionDataFromFireStore(true);
+        FirebaseUser user = FirebaseUtil.getFirebaseUser();
+
+        DocumentReference member = FirebaseUtil.getMembersFromProperty(getActivity(), user.getUid());
+        member.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                String depID = documentSnapshot.getString("department_id");
+                getInspectionDataFromFireStore(refreshing, depID);
+            }
+        });
     }
 
     @Override
@@ -144,7 +178,7 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
         //void onFragmentInteraction(Uri uri);
     }
 
-    private void getInspectionDataFromFireStore(final Boolean isRefreshing){
+    private void getInspectionDataFromFireStore(final Boolean isRefreshing, String departmentID){
 
         refreshContainer.setRefreshing(true);
         final String FireStoreTAG = "firestoreTag";
@@ -154,47 +188,148 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
 
         CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
 
-        final List<Inspection> inspections = new ArrayList<Inspection>();
+        if (mParamAdmin == true){
 
-        inspectionsColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (DocumentSnapshot document : task.getResult()) {
+            final List<Inspection> inspections = new ArrayList<Inspection>();
 
-                        if (document != null) {
-                           Inspection inspection = document.toObject(Inspection.class);
-                           inspection.setInspection_id(document.getId());
-                           inspections.add(inspection);
-                           if (inspections.size() != 0) {
-                               Log.d(FireStoreTAG, inspection.getInspection_name());
-                            }else{
-                               Log.d(FireStoreTAG, inspection.getInspection_name());
-                           }
-                        } else {
-                            Log.d(FireStoreTAG, "No such document");
-                            Toast.makeText(getContext(),"Fail to retrieve", Toast.LENGTH_SHORT).show();
+            inspectionsColl.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+
+                            if (document != null) {
+
+                                Inspection inspection = document.toObject(Inspection.class);
+                                inspection.setInspection_id(document.getId());
+
+                                //sort according to overdue
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTime(inspection.getInspection_submitted_at());
+
+                                calendar.add(Calendar.DATE, inspection.getInspection_days());
+
+                                Date supposeToCheckDate = new Date(calendar.getTimeInMillis());
+                                Date now = new Date();
+
+                                double diff = supposeToCheckDate.getTime() - now.getTime();
+                                double diffHours = diff / (60 * 60 * 1000);
+                                int hours = (int) diffHours;
+
+                                inspection.setInspection_to_be_dued(hours);
+                                inspections.add(inspection);
+
+
+                            } else {
+                                Log.d(FireStoreTAG, "No such document");
+                                Toast.makeText(getContext(),"Fail to retrieve", Toast.LENGTH_SHORT).show();
+                            }
                         }
+                    } else {
+                        Log.d(FireStoreTAG, "Error getting documents: ", task.getException());
+                        Toast.makeText(getContext(),"Couldn't refresh", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Log.d(FireStoreTAG, "Error getting documents: ", task.getException());
-                    Toast.makeText(getContext(),"Couldn't refresh", Toast.LENGTH_SHORT).show();
+
+
+                    Collections.sort(inspections, new Comparator<Inspection>(){
+                        public int compare(Inspection obj1, Inspection obj2) {
+                            // ## Ascending order
+
+                            return Integer.valueOf(obj1.getInspection_to_be_dued()).compareTo(obj2.getInspection_to_be_dued()); // To compare integer values
+
+                            // ## Descending order
+                            // return obj2.firstName.compareToIgnoreCase(obj1.firstName); // To compare string values
+                            // return Integer.valueOf(obj2.empId).compareTo(obj1.empId); // To compare integer values
+                        }
+                    });
+
+                    inspectionAdapter = new RecyclerViewAdapterForInspection(inspections, getContext());
+
+                    recyclerView.setAdapter(inspectionAdapter);
+                    recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+                    refreshContainer.setRefreshing(false);
+                    if (isRefreshing == true){
+
+                        refreshing = false;
+                    }else{
+
+                    }
                 }
 
-                inspectionAdapter = new RecyclerViewAdapterForInspection(inspections);
+            });
+        }else{
+            Query query = inspectionsColl.whereEqualTo("inspection_department", departmentID);
 
-                recyclerView.setAdapter(inspectionAdapter);
-                recyclerView.setItemAnimator(new DefaultItemAnimator());
+            final List<Inspection> inspections = new ArrayList<Inspection>();
 
-                refreshContainer.setRefreshing(false);
-                if (isRefreshing == true){
+            query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
 
-                    refreshing = false;
-                }else{
+                            if (document != null) {
 
+                                Inspection inspection = document.toObject(Inspection.class);
+                                inspection.setInspection_id(document.getId());
+
+                                //sort according to overdue
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTime(inspection.getInspection_submitted_at());
+
+                                calendar.add(Calendar.DATE, inspection.getInspection_days());
+
+                                Date supposeToCheckDate = new Date(calendar.getTimeInMillis());
+                                Date now = new Date();
+
+                                double diff = supposeToCheckDate.getTime() - now.getTime();
+                                double diffHours = diff / (60 * 60 * 1000);
+                                int hours = (int) diffHours;
+
+                                inspection.setInspection_to_be_dued(hours);
+                                inspections.add(inspection);
+
+
+                            } else {
+                                Log.d(FireStoreTAG, "No such document");
+                                Toast.makeText(getContext(),"Fail to retrieve", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    } else {
+                        Log.d(FireStoreTAG, "Error getting documents: ", task.getException());
+                        Toast.makeText(getContext(),"Couldn't refresh", Toast.LENGTH_SHORT).show();
+                    }
+
+
+                    Collections.sort(inspections, new Comparator<Inspection>(){
+                        public int compare(Inspection obj1, Inspection obj2) {
+                            // ## Ascending order
+
+                            return Integer.valueOf(obj1.getInspection_to_be_dued()).compareTo(obj2.getInspection_to_be_dued()); // To compare integer values
+
+                            // ## Descending order
+                            // return obj2.firstName.compareToIgnoreCase(obj1.firstName); // To compare string values
+                            // return Integer.valueOf(obj2.empId).compareTo(obj1.empId); // To compare integer values
+                        }
+                    });
+
+                    inspectionAdapter = new RecyclerViewAdapterForInspection(inspections, getContext());
+
+                    recyclerView.setAdapter(inspectionAdapter);
+                    recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+                    refreshContainer.setRefreshing(false);
+                    if (isRefreshing == true){
+
+                        refreshing = false;
+                    }else{
+
+                    }
                 }
-            }
 
-        });
+            });
+        }
+
     }
 }

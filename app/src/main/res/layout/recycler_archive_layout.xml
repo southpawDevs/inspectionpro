@@ -8,52 +8,32 @@
     android:orientation="vertical">
 
     <android.support.v7.widget.CardView
+        android:id="@+id/card_view_archive"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
         android:elevation="5dp"
         app:cardCornerRadius="5dp"
         app:cardUseCompatPadding="true"
-        android:layout_gravity="center"
-        android:id="@+id/card_view_archive">
+        android:minHeight="100dp">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/title_inspection_archive"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/title_inspection_archive"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:layout_marginTop="10dp"
-                android:fontFamily="@font/oxygen"
-                android:text="Pre Rig Up Drops Inspection Wireline Sheaves"
-                android:textAlignment="textStart"
-                android:textColor="@color/colorBlack"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/submitted_inspection_archive"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="3dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:fontFamily="@font/oxygen_light"
-                android:text="@string/title_archives"
-                android:textAlignment="textStart"
-                android:textColor="@color/colorBlack"
-                android:textSize="14sp"
-                android:textStyle="normal" />
-
-        </LinearLayout>
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="6dp"
+            android:fontFamily="@font/comfortaa"
+            android:text="Pre Rig U"
+            android:textColor="@color/colorBlack"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
     </android.support.v7.widget.CardView>
 

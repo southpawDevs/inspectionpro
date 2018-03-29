@@ -21,9 +21,11 @@ public class Inspection{
     private Date inspection_submitted_at;
     private int inspection_status;
     private int inspection_items_count;
+    private int inspection_pending_count;
     private int inspection_days;
     private List<InspectionItem> inspection_items_object = new ArrayList<>();
-
+    private int inspection_to_be_dued;
+    private String inspection_department;
     //add department ( marine , drilling)
 
     public Inspection(){
@@ -31,7 +33,7 @@ public class Inspection{
     }
 
     //constructor
-    public Inspection(String inspectionName, Date inspection_created_at, String inspectionCreatedBy, Date inspectionModifiedAt, String inspectionModifiedBy, String inspection_submitted_by, String inspection_submitted_by_name, Date inspection_submitted_at ,int inspectionStatus, int inspection_items_count, int inspection_days) {
+    public Inspection(String inspectionName, Date inspection_created_at, String inspectionCreatedBy, Date inspectionModifiedAt, String inspectionModifiedBy, String inspection_submitted_by, String inspection_submitted_by_name, Date inspection_submitted_at ,int inspectionStatus, int inspection_items_count, int inspection_days, String inspection_department) {
         this.inspection_name = inspectionName;
         this.inspection_created_at = inspection_created_at;
         this.inspection_created_by = inspectionCreatedBy;
@@ -42,6 +44,7 @@ public class Inspection{
         this.inspection_days = inspection_days;
         this.inspection_submitted_at = inspection_submitted_at;
         this.inspection_submitted_by = inspection_submitted_by;
+        this.inspection_department = inspection_department;
     }
 
     //getters
@@ -91,6 +94,18 @@ public class Inspection{
 
     public int getInspection_items_count(){return inspection_items_count;}
 
+    public int getInspection_to_be_dued() {
+        return inspection_to_be_dued;
+    }
+
+    public int getInspection_pending_count() {
+        return inspection_pending_count;
+    }
+
+    public String getInspection_department() {
+        return inspection_department;
+    }
+
     //get itemArray
     public List<InspectionItem> getInspection_items_object() {
         return inspection_items_object;
@@ -129,4 +144,39 @@ public class Inspection{
         this.inspection_items_object = inspection_items_object;
     }
 
+    public void setInspection_to_be_dued(int inspection_to_be_dued) {
+        this.inspection_to_be_dued = inspection_to_be_dued;
+    }
+
+    public void setInspection_pending_count(int inspection_pending_count) {
+        this.inspection_pending_count = inspection_pending_count;
+    }
+
+    public void setInspection_days(int inspection_days) {
+        this.inspection_days = inspection_days;
+    }
+
+    public void setInspection_items_count(int inspection_items_count) {
+        this.inspection_items_count = inspection_items_count;
+    }
+
+    public void setInspection_items_object(List<InspectionItem> inspection_items_object) {
+        this.inspection_items_object = inspection_items_object;
+    }
+
+    public void setInspection_modified_at(Date inspection_modified_at) {
+        this.inspection_modified_at = inspection_modified_at;
+    }
+
+    public void setInspection_modified_by(String inspection_modified_by) {
+        this.inspection_modified_by = inspection_modified_by;
+    }
+
+    public void setInspection_status(int inspection_status) {
+        this.inspection_status = inspection_status;
+    }
+
+    public void setInspection_department(String inspection_department) {
+        this.inspection_department = inspection_department;
+    }
 }

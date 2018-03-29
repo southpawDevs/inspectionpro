@@ -1,28 +1,28 @@
 package devs.southpaw.com.inspectionpro;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.imagepipeline.common.RotationOptions;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.facebook.imagepipeline.decoder.SimpleProgressiveJpegConfig;
-import com.facebook.imagepipeline.request.ImageRequest;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.net.URI;
+import org.w3c.dom.Text;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -58,10 +58,43 @@ public class SplashScreenActivity extends AppCompatActivity {
             // User is signed in (getCurrentUser() will be null if not signed in)
 
             //redirect page
-            Intent mainActivityIntent = new Intent(this, MainActivity.class);
-            mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(mainActivityIntent);
-            finish();
+            final Activity mActivity = this;
+
+            String prefPID = SharedPrefUtil.getPropertyID(this);
+
+            //if already stored PID in shared preferences
+            if (TextUtils.isEmpty(prefPID)){
+
+                //get PID from firestore
+                CollectionReference users = FirebaseUtil.getUsersFromFirestore();
+                users.document(user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+
+                        if (documentSnapshot.exists()) {
+                            FirebaseUtil.saveDataToSharedPref(getBaseContext());
+                            Intent mainIntent = new Intent(mActivity, MainActivity.class);
+                            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(mainIntent);
+                            finish();
+                        } else {
+                            FirebaseUtil.saveDataToSharedPref(getBaseContext());
+                            registerUserToFirestore("");
+                            Intent signInIntent = new Intent(mActivity, SignInActivity.class);
+                            signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(signInIntent);
+                            finish();
+                        }
+                    }
+                });
+
+            }else {
+                Intent mainActivityIntent = new Intent(mActivity, MainActivity.class);
+                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(mainActivityIntent);
+                finish();
+            }
+
         }else{
             // Choose authentication providers
             List<AuthUI.IdpConfig> providers = Arrays.asList(
@@ -84,23 +117,46 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        final Activity mActivity = this;
+
         if (requestCode == RC_SIGN_IN) {
             finish();
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                FirebaseUtil.savePropertyIDFromUser(getApplicationContext());
+                FirebaseUser user = FirebaseUtil.getFirebaseUser();
 
-                String pid = SharedPrefUtil.getPropertyID(this);
-                registerUserToFirestore(pid);
+                CollectionReference users = FirebaseUtil.getUsersFromFirestore();
+                users.document(user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-                //log in to main screen
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
+                        if (documentSnapshot.exists()) {
+                            FirebaseUtil.saveDataToSharedPref(getBaseContext());
+                            String pid = documentSnapshot.getString("assigned_property");
+
+                            if(TextUtils.isEmpty(pid)){
+                                Intent signInIntent = new Intent(mActivity, SignInActivity.class);
+                                signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(signInIntent);
+                                finish();
+                            }else {
+                                Intent mainActivityIntent = new Intent(mActivity, MainActivity.class);
+                                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(mainActivityIntent);
+                                finish();
+                            }
+                        } else {
+                            registerUserToFirestore("");
+                            Intent signInIntent = new Intent(mActivity, SignInActivity.class);
+                            signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(signInIntent);
+                            finish();
+                        }
+                    }
+                });
 
             } else {
                 // Sign in failed, check response for error code
@@ -138,6 +194,5 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         FirebaseUtil.setUsersFromFirestore(registerUser);
     }
-
 
 }

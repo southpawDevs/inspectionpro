@@ -23,9 +23,11 @@
                 android:focusableInTouchMode="true">
 
                 <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recycler_archive_items"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/recycler_archive_items"
+                    android:layout_marginLeft="0dp"
+                    android:layout_marginRight="0dp"
                     android:nestedScrollingEnabled="false">
 
                 </android.support.v7.widget.RecyclerView>
