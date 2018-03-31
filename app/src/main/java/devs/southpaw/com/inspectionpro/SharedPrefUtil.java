@@ -44,6 +44,8 @@ public class SharedPrefUtil {
 
     public static void logOutRemoveSharedPref(Activity activity){
         SharedPreferences.Editor editor = sharedPref.edit().remove(activity.getString(R.string.property_id_key)).remove(activity.getString(R.string.admin_rights_key)).remove(activity.getString(R.string.developer_rights_key));
+        editor.clear();
+        editor.commit();
     }
 
 

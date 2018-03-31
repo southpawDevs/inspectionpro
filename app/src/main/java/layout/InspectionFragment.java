@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -110,6 +112,27 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
             mParam2 = getArguments().getString(ARG_PARAM2);
             mParamAdmin = getArguments().getBoolean(ARG_ADMIN);
         }
+
+
+        FirebaseUser user = FirebaseUtil.getFirebaseUser();
+
+        final Context context = getContext();
+        DocumentReference member = FirebaseUtil.getMembersFromProperty(getActivity(), user.getUid());
+        member.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    String depID = documentSnapshot.getString("department_id");
+                    getInspectionDataFromFireStore(refreshing, depID);
+                }else{
+                    new MaterialDialog.Builder(context)
+                            .title("Not Assigned To Department")
+                            .content("You are not assigned to any department. Please contact admin to be assigned in a department")
+                            .positiveText(R.string.ok)
+                            .show();
+                }
+            }
+        });
     }
 
     @Override
@@ -132,8 +155,17 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
                 member.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        String depID = documentSnapshot.getString("department_id");
-                        getInspectionDataFromFireStore(refreshing, depID);
+                        if (documentSnapshot.exists()) {
+                            String depID = documentSnapshot.getString("department_id");
+                            getInspectionDataFromFireStore(refreshing, depID);
+                        }else{
+//                            new MaterialDialog.Builder(getContext())
+//                                    .title("Not Assigned To Department")
+//                                    .content("You are not assigned to any department. Please contact admin to be assigned in a department")
+//                                    .positiveText(R.string.ok)
+//                                    .negativeText(R.string.cancel)
+//                                    .show();
+                        }
                     }
                 });
 
@@ -156,16 +188,7 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
     @Override
     public void onResume() {
         super.onResume();
-        FirebaseUser user = FirebaseUtil.getFirebaseUser();
 
-        DocumentReference member = FirebaseUtil.getMembersFromProperty(getActivity(), user.getUid());
-        member.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                String depID = documentSnapshot.getString("department_id");
-                getInspectionDataFromFireStore(refreshing, depID);
-            }
-        });
     }
 
     @Override

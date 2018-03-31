@@ -30,6 +30,7 @@ import java.util.List;
 import adapters.RecyclerViewAdapterForArchive;
 import adapters.RecyclerViewAdapterForInspection;
 import devs.southpaw.com.inspectionpro.R;
+import devs.southpaw.com.inspectionpro.SharedPrefUtil;
 import objects.Inspection;
 
 /**
@@ -57,6 +58,8 @@ public class ArchiveFragment extends Fragment {
     private RecyclerViewAdapterForArchive archiveAdapter;
     private SwipeRefreshLayout refreshContainer;
     private Boolean refreshing = false;
+
+    private String pid;
 
     public ArchiveFragment() {
         // Required empty public constructor
@@ -87,6 +90,8 @@ public class ArchiveFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        pid = SharedPrefUtil.getPropertyID(getActivity());
     }
 
     @Override
@@ -168,7 +173,7 @@ public class ArchiveFragment extends Fragment {
         final String FireStoreTAG = "firestoreTag";
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+        DocumentReference devHousePropertyDoc = db.collection("properties").document(pid);
 
         CollectionReference archivesColl = devHousePropertyDoc.collection("archives");
 

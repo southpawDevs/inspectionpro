@@ -2,6 +2,7 @@ package devs.southpaw.com.inspectionpro;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -63,7 +65,6 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
     static String TAG_Firestore = "Firestore";
 
     static FirebaseAuth auth = FirebaseAuth.getInstance();
-    static FirebaseUser user = auth.getCurrentUser();
     static FirebaseDatabase firebaseDatabase;
     static FirebaseFirestore db = FirebaseFirestore.getInstance();
     static FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -99,10 +100,12 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
 
     //Firebase Auth User
     public static FirebaseUser getFirebaseUser(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         return user;
     }
 
     public static void saveDataToSharedPref(final Context context){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         db.collection("users").document(user.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -133,13 +136,29 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
         });
     }
 
+    public static void saveDataToSharedPrefAndIntent(DocumentSnapshot documentRef, final Context context, final Intent intent){
+
+        User user = documentRef.toObject(User.class);
+        assignedPropertyID = user.getAssigned_property();
+        adminRights = user.getAdmin_rights();
+        develeporRights = user.getDeveloper_rights();
+
+        SharedPreferences sharedPref = SharedPrefUtil.getSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(context.getString(R.string.property_id_key), assignedPropertyID);
+        editor.putBoolean(context.getString(R.string.admin_rights_key), adminRights);
+        editor.putBoolean(context.getString(R.string.developer_rights_key), develeporRights);
+        editor.apply();
+
+        context.startActivity(intent);
+    }
+
     public static void registerPropertyToSharedPref(final Context context, String pid){
 
         SharedPreferences sharedPref = SharedPrefUtil.getSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString(context.getString(R.string.property_id_key), pid);
         editor.commit();
-
     }
 
     //FIRESTORE
@@ -149,8 +168,9 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
 
     public static DocumentReference getPropertyRefFromFirestore(Activity activity){
         String propertyID = SharedPrefUtil.getPropertyID(activity);
-        DocumentReference propertyRef = db.collection("properties").document(propertyID);
 
+        Log.d("PROPERTY_SP", propertyID);
+        DocumentReference propertyRef = db.collection("properties").document(propertyID);
         return propertyRef;
     }
 
@@ -166,13 +186,15 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
         return usersRef;
     }
 
-    public static void setUsersFromFirestore(User userObject){
+    public static void setUsersFromFirestore(User userObject, final Context context){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         getUsersFromFirestore().document(user.getUid()).set(userObject)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG_Firestore, "DocumentSnapshot successfully written!");
+                FirebaseUtil.saveDataToSharedPref(context);
             }
         })
                 .addOnFailureListener(new OnFailureListener() {
@@ -228,12 +250,13 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
 
 
     //FIREBASE STORAGE
-
     public static StorageReference getStorageRef(Activity activity){
         return storageRef.child(SharedPrefUtil.getPropertyID(activity));
     }
 
     public static Boolean uploadImageToStorageProperty(String imageFilePath, final String childPathAfterImages, final Activity activity, final String toastCategory, ImageView imageView){
+
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         StorageReference storagePath;
 
@@ -242,7 +265,6 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
         Uri file = Uri.fromFile(new File(imageFilePath));
 
         storagePath = storageRef.child(propertyID).child("images/"+childPathAfterImages+file.getLastPathSegment());
-
 
         imageView.setDrawingCacheEnabled(true);
         imageView.buildDrawingCache();

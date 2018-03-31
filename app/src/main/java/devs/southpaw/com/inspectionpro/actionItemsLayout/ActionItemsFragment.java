@@ -4,7 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -14,32 +14,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.imagepipeline.common.RotationOptions;
-import com.facebook.imagepipeline.request.ImageRequest;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.stfalcon.frescoimageviewer.ImageViewer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import adapters.RecyclerViewAdapterForActionItems;
-import adapters.RecyclerViewAdapterForInspection;
-import adapters.RecyclerViewAdapterForItem;
 import devs.southpaw.com.inspectionpro.FirebaseUtil;
 import devs.southpaw.com.inspectionpro.R;
 import objects.ActionItems;
-import objects.InspectionItem;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -67,6 +59,7 @@ public class ActionItemsFragment extends Fragment implements RecyclerViewAdapter
     private RecyclerViewAdapterForActionItems itemsAdapter;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout refreshContainer;
+    private TextView pullTV;
 
     private Boolean refreshing = false;
 
@@ -107,7 +100,7 @@ public class ActionItemsFragment extends Fragment implements RecyclerViewAdapter
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_action_items, container, false);
 
-
+        pullTV = (TextView) view.findViewById(R.id.ai_pull_tv);
 
         //handle pull refreshing container
         refreshContainer = (SwipeRefreshLayout) view.findViewById(R.id.refresh_container_action_items);
@@ -186,10 +179,10 @@ public class ActionItemsFragment extends Fragment implements RecyclerViewAdapter
     }
 
     private  void  getActionItemsData(){
+        final Context context = getContext();
         refreshContainer.setRefreshing(true);
         itemsAdapter = new RecyclerViewAdapterForActionItems(actionItemsData, getContext(), getActivity());
         CollectionReference actionItemsColl = FirebaseUtil.getActionItems(getActivity());
-
         actionItemsColl.orderBy("item_reported_at", Query.Direction.DESCENDING).limit(40).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -197,7 +190,9 @@ public class ActionItemsFragment extends Fragment implements RecyclerViewAdapter
 
                     if (task.getResult().isEmpty()){
                         refreshContainer.setRefreshing(false);
-                        Toast.makeText(getActivity(), "No Data", Toast.LENGTH_SHORT).show();
+                        pullTV.setText("No Data");
+                    }else{
+                        pullTV.setText("pull to refresh");
                     }
 
                     List<ActionItems> tempArray = new ArrayList<>();

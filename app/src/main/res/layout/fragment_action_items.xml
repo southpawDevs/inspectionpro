@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="devs.southpaw.com.inspectionpro.actionItemsLayout.ActionItemsFragment">
+    tools:context="devs.southpaw.com.inspectionpro.actionItemsLayout.ActionItemsFragment"
+    android:id="@+id/ai_coordinator_layout">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,6 +12,7 @@
         android:layout_marginTop="58dp">
 
         <TextView
+            android:id="@+id/ai_pull_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -41,10 +43,6 @@
 
         </android.support.v4.widget.SwipeRefreshLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/snackbar_container"/>
 
     </LinearLayout>
 

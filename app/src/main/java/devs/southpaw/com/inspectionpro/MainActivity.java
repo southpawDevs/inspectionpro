@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -21,11 +22,15 @@ import android.support.v4.view.LayoutInflaterCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -39,6 +44,8 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+
+import java.util.Map;
 
 import devs.southpaw.com.inspectionpro.accountLayout.AccountFragment;
 import devs.southpaw.com.inspectionpro.actionItemsLayout.ActionItemsFragment;
@@ -249,7 +256,6 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
     }
 
     private void updateToolbarText(CharSequence text) {
-
         titleToolbar.setText(text);
     }
 
@@ -260,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
 
-        //handle USER AVAILABITY
+        //handle USER AVAILABILITY
         Boolean admin = SharedPrefUtil.getAdminRights(this);
 
         // Create the AccountHeader
@@ -295,14 +301,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
 
                 //log out
-                FirebaseAuth.getInstance().signOut();
-
-                SharedPrefUtil.logOutRemoveSharedPref(activity);
-
-                Intent loginIntent = new Intent(getBaseContext(), SplashScreenActivity.class);
-                loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(loginIntent);
-
+                signOutFromFirebaseAuth();
                 return  true;
             }
         }));
@@ -400,6 +399,24 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
                 .build();
 
         return drawer;
+    }
+
+    private void signOutFromFirebaseAuth(){
+        final Activity activity = this;
+        AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    SharedPrefUtil.logOutRemoveSharedPref(activity);
+
+                    FirebaseAuth.getInstance().signOut();
+
+                    Intent loginIntent = new Intent(getBaseContext(), SplashScreenActivity.class);
+                    loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(loginIntent);
+                }
+            }
+        });
     }
 
 

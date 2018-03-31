@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.w3c.dom.Text;
@@ -72,34 +73,37 @@ public class SplashScreenActivity extends AppCompatActivity {
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
 
                         if (documentSnapshot.exists()) {
-                            FirebaseUtil.saveDataToSharedPref(getBaseContext());
                             Intent mainIntent = new Intent(mActivity, MainActivity.class);
-                            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(mainIntent);
+                            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            //startActivity(mainIntent);
+                            FirebaseUtil.saveDataToSharedPrefAndIntent(documentSnapshot,getBaseContext(),mainIntent);
                             finish();
                         } else {
-                            FirebaseUtil.saveDataToSharedPref(getBaseContext());
                             registerUserToFirestore("");
                             Intent signInIntent = new Intent(mActivity, SignInActivity.class);
-                            signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(signInIntent);
+                            signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            FirebaseUtil.saveDataToSharedPrefAndIntent(documentSnapshot,getBaseContext(),signInIntent);
                             finish();
                         }
                     }
                 });
-
             }else {
-                Intent mainActivityIntent = new Intent(mActivity, MainActivity.class);
-                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(mainActivityIntent);
-                finish();
+                CollectionReference users = FirebaseUtil.getUsersFromFirestore();
+                users.document(user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Intent mainActivityIntent = new Intent(mActivity, MainActivity.class);
+                        mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        FirebaseUtil.saveDataToSharedPrefAndIntent(documentSnapshot,getBaseContext(),mainActivityIntent);
+                        finish();
+                    }
+                });
             }
 
         }else{
             // Choose authentication providers
             List<AuthUI.IdpConfig> providers = Arrays.asList(
-                    new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                    new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER).build());
+                    new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build());
 
 // Create and launch sign-in intent
             startActivityForResult(
@@ -120,38 +124,37 @@ public class SplashScreenActivity extends AppCompatActivity {
         final Activity mActivity = this;
 
         if (requestCode == RC_SIGN_IN) {
-            finish();
             IdpResponse response = IdpResponse.fromResultIntent(data);
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-
-                FirebaseUser user = FirebaseUtil.getFirebaseUser();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
                 CollectionReference users = FirebaseUtil.getUsersFromFirestore();
-                users.document(user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                final DocumentReference docRef = users.document(user.getUid());
+                docRef.get()
+                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
 
                         if (documentSnapshot.exists()) {
-                            FirebaseUtil.saveDataToSharedPref(getBaseContext());
                             String pid = documentSnapshot.getString("assigned_property");
 
                             if(TextUtils.isEmpty(pid)){
                                 Intent signInIntent = new Intent(mActivity, SignInActivity.class);
-                                signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(signInIntent);
+                                signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                FirebaseUtil.saveDataToSharedPrefAndIntent(documentSnapshot,getBaseContext(),signInIntent);
                                 finish();
                             }else {
                                 Intent mainActivityIntent = new Intent(mActivity, MainActivity.class);
-                                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(mainActivityIntent);
+                                mainActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                FirebaseUtil.saveDataToSharedPrefAndIntent(documentSnapshot,getBaseContext(),mainActivityIntent);
                                 finish();
                             }
                         } else {
                             registerUserToFirestore("");
                             Intent signInIntent = new Intent(mActivity, SignInActivity.class);
-                            signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            signInIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(signInIntent);
                             finish();
                         }
@@ -163,7 +166,6 @@ public class SplashScreenActivity extends AppCompatActivity {
                 // ...
                 Log.d("fail sign in", "fail sign in");
             }
-
         }
     }
 
@@ -192,7 +194,6 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         User registerUser = new User(uid, username, email, admin, developer, photoUrl, pid);
 
-        FirebaseUtil.setUsersFromFirestore(registerUser);
+        FirebaseUtil.setUsersFromFirestore(registerUser,getBaseContext());
     }
-
 }

@@ -10,6 +10,9 @@
     <string name="inspection_item_delete">Delete Item</string>
     <string name="inspection_item_edit">Edit Item</string>
 
+    <string name="ok">OK</string>
+    <string name="cancel">CANCEL</string>
+
     //info
     <string name="info_submit_inspection">Inspection can only be submitted if all items are checked within the same day. Click the \"SUBMIT INSPECTION\" button to submit</string>
 
@@ -34,6 +37,6 @@
     <string name="property_id_key">"property_id"</string>
     <string name="admin_rights_key">"admin_rights"</string>
     <string name="developer_rights_key">"developer_rights"</string>
-    <string name="default_property_id">""</string>
+    <string name="default_property_id">"BII23jaMNV8lNQJvj2Gt""</string>
     <string name="title_activity_action_items_detail">ActionItemsDetailActivity</string>
 </resources>

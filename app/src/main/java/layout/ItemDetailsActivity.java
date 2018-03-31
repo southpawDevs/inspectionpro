@@ -104,6 +104,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     IconicsImageView conditionImageIcon;
     IconicsImageView commentIcon;
 
+    String pid;
 
     private InputMethodManager imm;
 
@@ -192,6 +193,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_details);
+
+        pid = SharedPrefUtil.getPropertyID(this);
 
         mActivity = this;
         mProgressDialog = new MaterialDialog.Builder(mActivity)
@@ -370,7 +373,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
             case R.id.inspection_item_delete:
 
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-                DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+                DocumentReference devHousePropertyDoc = db.collection("properties").document(pid);
 
                 final CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
                 final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
@@ -451,7 +454,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
         // Create a child reference
         // imagesRef now points to "images"
-        StorageReference imagesItemRef = storageRef.child("oNJZmUlwxGxAymdyKoIV").child("images").child("temp_"+item_id);
+        StorageReference imagesItemRef = storageRef.child(pid).child("images").child("temp_"+item_id);
 
 
         Uri file = Uri.fromFile(new File(mCurrentPhotoPath));
@@ -478,7 +481,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
                 Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
-                DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+                DocumentReference devHousePropertyDoc = db.collection("properties").document(pid);
 
                 CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
                 final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
@@ -495,25 +498,25 @@ public class ItemDetailsActivity extends AppCompatActivity {
                 return;
             }
         })
-        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
 
-                double progress = 100.0 * (taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                System.out.println("Upload is " + progress + "% done");
-                int totalBytes = (int) taskSnapshot.getTotalByteCount();
-                int currentprogress = (int) progress;
+                        double progress = 100.0 * (taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                        System.out.println("Upload is " + progress + "% done");
+                        int totalBytes = (int) taskSnapshot.getTotalByteCount();
+                        int currentprogress = (int) progress;
 
-                //showProgress(currentprogress, totalBytes );
-            }
-        });
+                        //showProgress(currentprogress, totalBytes );
+                    }
+                });
     }
 
     private void uploadCommentsToFirebase(String item_id, String comments){
 
         if (comments != null || comments != "") {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+            DocumentReference devHousePropertyDoc = db.collection("properties").document(pid);
             CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
             final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
 
@@ -549,7 +552,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     private void updateStatusToFirestore(String item_id, final int status, String comments){
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference devHousePropertyDoc = db.collection("properties").document("oNJZmUlwxGxAymdyKoIV");
+        DocumentReference devHousePropertyDoc = db.collection("properties").document(pid);
         CollectionReference inspectionsColl = devHousePropertyDoc.collection("inspections");
         final CollectionReference itemsColl = inspectionsColl.document(inspectionID).collection("items");
 
@@ -606,12 +609,21 @@ public class ItemDetailsActivity extends AppCompatActivity {
 
 
     private void deleteInspectionItem(CollectionReference colRef, String itemID){
+
+        final Activity activity = this;
+
         colRef.document(itemID)
                 .delete()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d("Firestore inspection", "DocumentSnapshot successfully deleted!");
+                        DocumentReference devHouse = FirebaseUtil.getPropertyRefFromFirestore(activity);
+                        CollectionReference inspectionsColl = devHouse.collection("inspections");
+                        inspectionsColl.document(inspectionID).update(
+                                "inspection_pending_count", pendingCount -= 1
+                        );
+
                         Toast.makeText(getBaseContext(), "Item deleted", Toast.LENGTH_SHORT).show();
                         finish();
                     }
