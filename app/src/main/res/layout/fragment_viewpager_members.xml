@@ -1,13 +1,16 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="devs.southpaw.com.inspectionpro.myRigLayout.viewpager_members">
+    tools:context="devs.southpaw.com.inspectionpro.myRigLayout.viewpager_members"
+    android:background="@color/colorPrimaryWhite"
+    android:id="@+id/members_refresh">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/members_departmemt_rv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="assign members here" />
+        android:layout_height="match_parent">
 
-</FrameLayout>
+    </android.support.v7.widget.RecyclerView>
+
+</android.support.v4.widget.SwipeRefreshLayout>

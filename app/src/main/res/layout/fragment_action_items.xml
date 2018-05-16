@@ -12,17 +12,40 @@
         android:layout_marginTop="58dp">
 
         <TextView
-            android:id="@+id/ai_pull_tv"
+            android:id="@+id/ai_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="3dp"
             android:layout_marginTop="6dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:fontFamily="@font/comfortaa"
+            android:text="Action Items are marked items that may have urgent issues to be resolved"
+            android:textAlignment="center"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/ai_pull_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="2dp"
             android:fontFamily="@font/oxygen"
             android:text="pull to refresh"
             android:textAlignment="center"
             android:textSize="10dp"
-            android:textColor="@color/colorGrey"/>
+            android:textColor="@color/colorDarkGrey"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="1dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="1dp"
+            android:background="@color/colorPrimaryWhite"></View>
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:layout_width="match_parent"

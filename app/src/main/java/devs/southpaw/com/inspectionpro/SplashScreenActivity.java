@@ -111,7 +111,8 @@ public class SplashScreenActivity extends AppCompatActivity {
                             .createSignInIntentBuilder()
                             .setAvailableProviders(providers)
                             .setTheme(R.style.AppThemeFirebaseAuth)
-                            .setLogo(R.drawable.splash_screen_logo)
+                            .setLogo(R.drawable.inspecpro_logo)
+                            .setAllowNewEmailAccounts(true)
                             .build(),
                     RC_SIGN_IN);
         }

@@ -1,5 +1,6 @@
 package devs.southpaw.com.inspectionpro.actionItemsLayout;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
@@ -19,6 +20,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.RotationOptions;
@@ -43,6 +46,7 @@ import java.util.List;
 
 import devs.southpaw.com.inspectionpro.FirebaseUtil;
 import devs.southpaw.com.inspectionpro.R;
+import devs.southpaw.com.inspectionpro.SharedPrefUtil;
 import devs.southpaw.com.inspectionpro.UIUtil;
 import objects.ActionItems;
 
@@ -71,11 +75,16 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action_items_detail);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.action_item_toolbar);
-        toolbar.getMenu();
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.action_item_toolbar);
+//        toolbar.getMenu();
+//        toolbar.setTitle("");
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //UIUtil.setStatusAndActionBarDeepOrangeColor(this, toolbar);
+
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setTitle("Action Item");
 
         mActivity = this;
 
@@ -88,12 +97,10 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
         conditionImageView = (SimpleDraweeView) findViewById(R.id.ai_condition_image_view);
         summaryEditText = (EditText) findViewById(R.id.summary_checked_edit_text);
 
-        greenButton = (Button) findViewById(R.id.green_button);
-        redButton = (Button) findViewById(R.id.red_button);
+        greenButton = (Button) findViewById(R.id.ai_green_button);
+        redButton = (Button) findViewById(R.id.ai_red_button);
         itemStatusGreen = (CardView) findViewById(R.id.action_item_status_check_green);
         itemStatusRed = (CardView) findViewById(R.id.action_item_status_check_red);
-
-        UIUtil.setStatusAndActionBarDeepOrangeColor(this, toolbar);
 
         conditionImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,6 +162,61 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+
+        //setup rectified card
+        showRectifiedUi(selectedActionItem.getAi_rectified_status());
+
+        greenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //handle USER AVAILABILITY
+                Boolean admin = SharedPrefUtil.getAdminRights(mActivity);
+                if (admin == true) {
+                    MaterialDialog dialog = new MaterialDialog.Builder(mActivity)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                                    //rectified Action Item here
+                                    deleteAIFirestore(selectedActionItem.getAi_id());
+                                }
+                            })
+                            .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .title("Are you sure?")
+                            .content("Please re-ensure that this action item can be rectified.")
+                            .positiveText("Ok")
+                            .negativeText("Cancel")
+                            .show();
+                } else {
+
+                    MaterialDialog dialog = new MaterialDialog.Builder(mActivity)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .title("Oops")
+                            .content("You do not have the right to rectified this action item.")
+                            .positiveText("Ok")
+                            .show();
+                }
+            }
+        });
+
+        redButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     @Override
@@ -207,7 +269,7 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
                         public void onSuccess(Void aVoid) {
                             summaryEditText.setCursorVisible(false);
                             hideKeyboard();
-                            Toast.makeText(getBaseContext(), "report updated", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "report updated", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -215,12 +277,22 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
                         public void onFailure(@NonNull Exception e) {
                             summaryEditText.setCursorVisible(false);
                             hideKeyboard();
-                            Toast.makeText(getBaseContext(), "fail to upload report", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "fail to upload report", Toast.LENGTH_SHORT).show();
                         }
                     });
 
         }else{
             Toast.makeText(this, "please fill in comments", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showRectifiedUi(Boolean bool){
+        if (bool == true){
+            itemStatusGreen.setVisibility(View.VISIBLE);
+            itemStatusRed.setVisibility(View.INVISIBLE);
+        }else{
+            itemStatusGreen.setVisibility(View.INVISIBLE);
+            itemStatusRed.setVisibility(View.VISIBLE);
         }
     }
 
@@ -236,7 +308,25 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
     private void updateAIStatusToFirestore(String ai_item_id, final Boolean status) {
 
         DocumentReference aiItemRef = FirebaseUtil.getActionItem(mActivity,ai_item_id);
+        aiItemRef.delete();
 
+
+    }
+
+    private void deleteAIFirestore(String ai_item_id) {
+
+        DocumentReference aiItemRef = FirebaseUtil.getActionItem(mActivity,ai_item_id);
+        aiItemRef.delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()){
+                    finish();
+                    Toast.makeText(getApplicationContext(), "Action Item rectified", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(), "Fail to rectify Action Item", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
     }
 }

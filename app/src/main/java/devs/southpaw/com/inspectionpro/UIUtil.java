@@ -37,6 +37,14 @@ public final class UIUtil {
         return date;
     }
 
+    public static String getStringDateAndTimeFromDate(Date inputDate) {
+        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+        cal.setTime(inputDate);
+
+        String date = DateFormat.format("dd-MMM-yyyy hh:mm aa", cal).toString();
+        return date;
+    }
+
     public static IconicsDrawable getGMD(Context context, IIcon gmdIcon, int sizeDp, int paddingDp){
 
         IconicsDrawable icon = new IconicsDrawable(context)

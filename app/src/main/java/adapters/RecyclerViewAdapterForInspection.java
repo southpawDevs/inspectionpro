@@ -1,9 +1,13 @@
 package adapters;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -12,6 +16,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.gson.Gson;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.view.IconicsImageView;
@@ -21,9 +30,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import devs.southpaw.com.inspectionpro.FirebaseUtil;
 import devs.southpaw.com.inspectionpro.R;
 import devs.southpaw.com.inspectionpro.UIUtil;
 import layout.InspectionDetailsActivity;
+import objects.Department;
 import objects.Inspection;
 
 /**
@@ -34,6 +45,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
     private List<Inspection> inspectionsData;
     Context mContext;
+    Activity mActivity;
 
     final private RecyclerItemClickListener mOnClickListener;
 
@@ -42,10 +54,11 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
 
     }
 
-    public RecyclerViewAdapterForInspection(List<Inspection> inspectionsData, Context context) {
+    public RecyclerViewAdapterForInspection(List<Inspection> inspectionsData, Context context, Activity activity) {
         this.inspectionsData = inspectionsData;
         mOnClickListener = null;
         mContext = context;
+        mActivity = activity;
     }
 
     public RecyclerViewAdapterForInspection(List<Inspection> inspectionsData, RecyclerItemClickListener mOnClickListener) {
@@ -66,7 +79,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
     }
 
     @Override
-    public void onBindViewHolder(RecyclerViewAdapterForInspection.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerViewAdapterForInspection.ViewHolder holder, int position) {
 
         Inspection currentInspection = inspectionsData.get(position);
 
@@ -149,8 +162,35 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
         holder.inspectionOverdue.setText(dueInText);
 
         //set item count
-        String totalCounts  = String.valueOf(currentInspection.getInspection_pending_count());
-        holder.inspectionItemsCount.setText(totalCounts + " items to inspect");
+        String pendingCounts  = String.valueOf(currentInspection.getInspection_pending_count());
+        String totalCounts  = String.valueOf(currentInspection.getInspection_items_count());
+        holder.inspectionItemsCount.setText(pendingCounts+"/"+totalCounts + " items to inspect");
+
+        //get department obj
+        CollectionReference depColl = FirebaseUtil.getDepartmentsFromFirestore(mActivity);
+        DocumentReference depDoc = depColl.document(currentInspection.getInspection_department());
+
+        depDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    if (document != null && document.exists()) {
+                        Department department = document.toObject(Department.class);
+
+                        holder.inspectionDepartment.setText(department.getDepartment_name());
+                        holder.inspectionDepartment.setBackgroundColor(Color.parseColor(department.getDepartment_color_hex()));
+                        holder.inspectionDepartment.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.inspectionDepartment.setVisibility(View.GONE);
+                    }
+                }else{
+                    holder.inspectionDepartment.setVisibility(View.GONE);
+                }
+            }
+        });
+
+
     }
 
     @Override
@@ -170,6 +210,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
         public TextView inspectionOverdue;
         public TextView inspectionReady;
         public TextView inspectionItemsCount;
+        public TextView inspectionDepartment;
         public CardView cardBackground;
         public IconicsImageView timeIcon;
         public IconicsImageView lastIcon;
@@ -190,6 +231,7 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
             lastIcon = itemLayoutView.findViewById(R.id.inspection_checked_icon);
             inspectionOverdue = itemLayoutView.findViewById(R.id.overdue_inspection_text_view);
             countIcon = itemLayoutView.findViewById(R.id.count_icon);
+            inspectionDepartment = itemLayoutView.findViewById(R.id.department_inspection);
 
             countIcon.setIcon(UIUtil.getGMD(mContext, GoogleMaterial.Icon.gmd_search,15,0,R.color.colorPrimaryWhite));
 

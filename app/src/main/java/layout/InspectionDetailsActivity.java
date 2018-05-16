@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -90,6 +91,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
     private int completedItemsCount = 0;
 
     private String selectedItemId;
+    private String selectedItemName;
     private String photoPath;
 
     private String pid = "";
@@ -105,6 +107,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
             // Get extra data included in the Intent
             photoPath = intent.getStringExtra("photo_path");
             selectedItemId = intent.getStringExtra("item_id");
+            selectedItemName = intent.getStringExtra("item_name");
         }
     };
 
@@ -124,8 +127,8 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         submitInspectionButton = (Button) findViewById(R.id.submit_inspection_button);
 
         mProgressDialog = new MaterialDialog.Builder(mActivity)
-                .title("Uploading to archive")
-                .content("please wait...")
+                .title("Submitting Inspection")
+                .content("Uploading to archive, please wait...")
                 .progress(true, 0)
                 .show();
         mProgressDialog.dismiss();
@@ -316,47 +319,8 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                     Toast.makeText(getBaseContext(),"Couldn't refresh", Toast.LENGTH_SHORT).show();
                 }
 
-                //get department obj
-                CollectionReference depColl = FirebaseUtil.getDepartmentsFromFirestore(mActivity);
-                DocumentReference depDoc = depColl.document(selectedInspection.getInspection_department());
-
-                depDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()){
-                            DocumentSnapshot document = task.getResult();
-                            if (document != null && document.exists()) {
-                                Department department = document.toObject(Department.class);
-
-                                //handle recycler view
-                                itemsAdapter = new RecyclerViewAdapterForItem(itemsData, getBaseContext(),mActivity, department, pid);
-                                itemsAdapter.getInspectionNameToItemAdapter(selectedInspection.getInspection_name(), selectedInspectionID, selectedInspection.getInspection_department());
-                                recyclerView.setAdapter(itemsAdapter);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-
-                            } else {
-                                Department department = new Department();
-//handle recycler view
-                                itemsAdapter = new RecyclerViewAdapterForItem(itemsData, getBaseContext(),mActivity, department,pid);
-                                itemsAdapter.getInspectionNameToItemAdapter(selectedInspection.getInspection_name(), selectedInspectionID, selectedInspection.getInspection_department());
-                                recyclerView.setAdapter(itemsAdapter);
-                                recyclerView.setItemAnimator(new DefaultItemAnimator());
-                            }
-                        }else{
-                            Department department = new Department();
-//handle recycler view
-                            itemsAdapter = new RecyclerViewAdapterForItem(itemsData, getBaseContext(),mActivity, department,pid);
-                            itemsAdapter.getInspectionNameToItemAdapter(selectedInspection.getInspection_name(), selectedInspectionID, selectedInspection.getInspection_department());
-                            recyclerView.setAdapter(itemsAdapter);
-                            recyclerView.setItemAnimator(new DefaultItemAnimator());
-                        }
-                    }
-                });
-
-                Department department = new Department();
-//handle recycler view
-                itemsAdapter = new RecyclerViewAdapterForItem(itemsData, getBaseContext(),mActivity, department,pid);
+                //handle recycler view
+                itemsAdapter = new RecyclerViewAdapterForItem(itemsData, getBaseContext(),mActivity,pid);
                 itemsAdapter.getInspectionNameToItemAdapter(selectedInspection.getInspection_name(), selectedInspectionID, selectedInspection.getInspection_department());
                 recyclerView.setAdapter(itemsAdapter);
                 recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -422,7 +386,6 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                     public void onFailure(@NonNull Exception e) {
                         Log.w("Firestore inspection", "Error deleting document", e);
                         Toast.makeText(getBaseContext(), "Fail to delete inspection", Toast.LENGTH_SHORT).show();
-
                     }
                 });
 
@@ -432,16 +395,52 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
         if (completedCount == totalCount){
 
-            FirebaseAuth auth = FirebaseAuth.getInstance();
-            FirebaseUser user = auth.getCurrentUser();
+            int pixCount = 0;
+            for (int i=0; i <= itemsData.size()-1; i++){
+                String photo = itemsData.get(i).getItem_condition_photo();
+                if (!TextUtils.isEmpty(photo)){
+                    pixCount += 1;
+                }
+            }
 
-            Inspection archive = new Inspection();
-            archive = selectedInspection;
-            archive.setInspection_submitted_at(new Date());
-            archive.setInspection_submitted_by(user.getUid());
-            archive.setInspection_submitted_by_name(user.getDisplayName());
+            if (pixCount == totalCount) {
+                //if condition photo is not empty
+                final FirebaseAuth auth = FirebaseAuth.getInstance();
+                final FirebaseUser user = auth.getCurrentUser();
 
-            createInspectionArchive(archive, archive.getInspection_submitted_at(), user.getUid(), user.getDisplayName());
+                MaterialDialog dialog = new MaterialDialog.Builder(mActivity)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                mProgressDialog.show();
+
+                                Inspection archive = new Inspection();
+                                archive = selectedInspection;
+                                archive.setInspection_submitted_at(new Date());
+                                archive.setInspection_submitted_by(user.getUid());
+                                archive.setInspection_submitted_by_name(user.getDisplayName());
+                                createInspectionArchive(archive, archive.getInspection_submitted_at(), user.getUid(), user.getDisplayName());
+                            }
+                        })
+                        .title("Inspection Submission")
+                        .content("Submit this inspection?")
+                        .positiveText("Submit")
+                        .negativeText("Cancel")
+                        .show();
+            }else{
+                MaterialDialog dialog = new MaterialDialog.Builder(mActivity)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .title("Oops")
+                        .content("Please ensure condition photos are taken during inspection")
+                        .positiveText("Ok")
+                        .show();
+            }
+
         }else{
             MaterialDialog dialog = new MaterialDialog.Builder(mActivity)
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
@@ -497,19 +496,52 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                             final StorageReference storageRef = FirebaseUtil.getStorageRef(mActivity);
                             StorageReference imageLocation = storageRef.child("images/temp_" + currentItemID);
 
-                            getTempImageAndAddImageToArchive(storageRef, imageLocation, selectedInspectionID, itemsColl, currentItemID,currentItem);
+                            //DISABLE IMAGES TO ARCHIVE EXCEPT ACTION ITEMS
+                            //getTempImageAndAddImageToArchive(storageRef, imageLocation, selectedInspectionID, itemsColl, currentItemID,currentItem);
 
+
+                            //Refresh temp item
+                            itemsColl.document(currentItemID).update(
+                                    "item_status", 0,
+                                    "item_condition_photo", null,
+                                    "item_comments", null
+
+                            ).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Toast.makeText(getBaseContext(),"Inspection Submitted", Toast.LENGTH_SHORT).show();
+                                    mProgressDialog.dismiss();
+                                    finish();
+                                }
+                            });
+
+                            if (currentItem.getItem_status() == 1) {
+                                File localFile = null;
+
+                                try {
+                                    localFile = File.createTempFile("tempArchive", "jpg");
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                final File finalLocalFile = localFile;
+                                imageLocation.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                        addActionItem(currentItemID, currentItem, (Uri.fromFile(finalLocalFile)));
+                                    }
+                                });
+                                //////
+                            }
                         }
 
+                        mProgressDialog.dismiss();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-
                         Log.w("Add Firestore", "Error adding document", e);
-
-                        Toast.makeText(getBaseContext(),"Fail to archived inspection", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getBaseContext(),"Fail to archived inspection+ " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                         //progressBar.setVisibility(View.INVISIBLE);
                     }
                 });
@@ -521,7 +553,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         final CollectionReference actionItemsColl = devHousePropertyDoc.collection("actionItems");
 
         //initailize action item
-        final ActionItems actionItem = new ActionItems(null, existingItemID, inspectionItem.getItem_name(), inspectionItem.getItem_comments(), new Date(), user.getEmail(), null, selectedInspection.getInspection_name(), selectedInspection.getInspection_id(),true);
+        final ActionItems actionItem = new ActionItems(null, existingItemID, inspectionItem.getItem_name(), inspectionItem.getItem_comments(), new Date(), user.getEmail(), null, selectedInspection.getInspection_name(), selectedInspection.getInspection_id(),false);
 
         final StorageReference storageRef = FirebaseUtil.getStorageRef(this);
 
@@ -567,8 +599,6 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
 
     private void getTempImageAndAddImageToArchive(final StorageReference storageRef, StorageReference imageLocation, final String inspectionID, final CollectionReference itemsColl, final String currentItemID, final InspectionItem currentItem) {
 
-        mProgressDialog.show();
-
         File localFile = null;
 
         try {
@@ -589,7 +619,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 uploadTask.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getBaseContext(),"Fail to upload image to archive", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getBaseContext(),"Fail to upload image to archive: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                         mProgressDialog.dismiss();
                         finish();
                     }
@@ -620,12 +650,11 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getBaseContext(),"Fail to submit inspection", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(),"Fail to submit inspection: "+ e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 mProgressDialog.dismiss();
                 finish();
             }
         });
-
     }
 
     private void updateDoneStatusToFirebase(final String item_id, int status){
@@ -641,15 +670,15 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                     @Override
                     public void onSuccess(Void aVoid) {
 
-                        int pendingCount = 0;
+                        int checkedCount = 0;
                         for (int l=0; l<selectedInspection.getInspection_items_count();l++){
-                            if (itemsData.get(l).getItem_status() == 0){
-                                pendingCount += 1;
+                            if (itemsData.get(l).getItem_status() != 0){
+                                checkedCount += 1;
                             }
                         }
 
                         inspectionsColl.document(selectedInspection.getInspection_id()).update(
-                                "inspection_pending_count", pendingCount
+                                "inspection_pending_count", checkedCount
                         );
 
                         setPic();
@@ -722,7 +751,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                 //update firestore
                 itemsColl.document(item_id).update("item_condition_photo", String.valueOf(downloadUrl));
 
-                Toast.makeText(mActivity,"condition image updated", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mActivity,"condition image: "+selectedItemName+" updated", Toast.LENGTH_SHORT).show();
 
                 //createButton.setClickable(true);
 

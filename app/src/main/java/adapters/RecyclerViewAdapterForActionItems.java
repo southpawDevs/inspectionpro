@@ -91,6 +91,8 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
         holder.titleActionItem.setText(selecteditem.getItem_name());
         holder.inspectionCategory.setText("Inspection: " + selecteditem.getInspection_name());
 
+        holder.reportIcon.setIcon(UIUtil.getGMD(mContext, GoogleMaterial.Icon.gmd_assignment,20,0,R.color.colorPrimaryWhite));
+
         String reportedDate = UIUtil.getStringDateFromDate(selecteditem.getItem_reported_at());
         holder.reportedAt.setText("Reported At: " + reportedDate);
         holder.reportedBy.setText("Reported By: " + selecteditem.getItem_reported_by());
@@ -211,12 +213,12 @@ public class RecyclerViewAdapterForActionItems extends RecyclerView.Adapter<Recy
 
             swipeRevealLayout.setEnabled(false);
 
-            IconicsDrawable drawableReport = new IconicsDrawable(mContext)
-                    .icon(GoogleMaterial.Icon.gmd_assignment)
-                    .color(Color.GRAY)
-                    .sizeDp(20);
-
-            reportIcon.setIcon(drawableReport);
+//            IconicsDrawable drawableReport = new IconicsDrawable(mContext)
+//                    .icon(GoogleMaterial.Icon.gmd_assignment)
+//                    .color(itemLayoutView.getResources().getColor(R.color.colorPrimaryWhite))
+//                    .sizeDp(20);
+//
+//            reportIcon.setIcon(drawableReport);
             //reportIcon.setVisibility(View.GONE);
 
             IconicsDrawable drawable = new IconicsDrawable(mContext)

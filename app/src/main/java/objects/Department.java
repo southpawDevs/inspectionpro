@@ -8,6 +8,7 @@ public class Department {
     public String department_name;
     public String department_photo;
     public String department_color_hex;
+    public String department_id;
 
     public Department() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
@@ -15,6 +16,10 @@ public class Department {
 
     public Department(String department_name, String department_color_hex, String department_photo) {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
+    }
+
+    public String getDepartment_id() {
+        return department_id;
     }
 
     public String getDepartment_color_hex() {
@@ -42,4 +47,7 @@ public class Department {
         this.department_photo = department_photo;
     }
 
+    public void setDepartment_id(String department_id) {
+        this.department_id = department_id;
+    }
 }

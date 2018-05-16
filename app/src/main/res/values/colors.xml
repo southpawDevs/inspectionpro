@@ -11,12 +11,13 @@
     <color name="colorStatusDarkGreen">#1e914b</color>
     <color name="colorStatusGrey">#eaeaea</color>
     <color name="colorStatusRed">#fa4048</color>
+    <color name="colorRed">#f8f72d35</color>
     <color name="colorDeepOrange">#FF5722</color>
     <color name="colorDarkDeepOrange">#BF360C</color>
     <color name="colorLightDeepOrange">#FF7043</color>
 
     <color name="colorLightGrey">#F7F7F7</color>
-    <color name="colorGrey">#BDBDBD</color>
+    <color name="colorGrey">#bdbdbd</color>
     <color name="colorDarkGrey">#898989</color>
 
 

@@ -87,6 +87,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="3dp"
                         android:orientation="horizontal">
 
                         <LinearLayout
@@ -97,22 +98,22 @@
 
                             <TextView
                                 android:id="@+id/title_item"
-                                android:layout_width="wrap_content"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="10dp"
                                 android:layout_marginTop="10dp"
                                 android:fontFamily="@font/comfortaa_bold"
+                                android:includeFontPadding="false"
                                 android:text="Title"
                                 android:textAlignment="textStart"
                                 android:textAllCaps="false"
                                 android:textColor="@color/colorLightBlack"
                                 android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:includeFontPadding="false" />
+                                android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/description_item"
-                                android:layout_width="wrap_content"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginBottom="4dp"
                                 android:layout_marginEnd="10dp"
@@ -121,7 +122,10 @@
                                 android:textAlignment="textStart"
                                 android:textColor="@color/colorLightBlack"
                                 android:textSize="14sp"
-                                android:textStyle="normal" />
+                                android:textStyle="normal"
+                                android:ellipsize="end"
+                                android:maxEms="15"
+                                android:singleLine="true"/>
 
                         </LinearLayout>
 
@@ -183,13 +187,15 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentTop="true"
                             android:layout_marginLeft="5dp"
+                            android:layout_marginRight="5dp"
                             android:layout_toEndOf="@+id/items_method_icon"
                             android:fontFamily="@font/oxygen"
-                            android:text="jhljhjkhjh jhl kjh "
+                            android:text="asd"
                             android:textAlignment="viewStart"
                             android:textAllCaps="false"
                             android:textColor="@color/colorDarkGrey"
-                            android:textSize="15sp" />
+                            android:textSize="15sp"
+                            android:layout_alignParentEnd="true"/>
 
                         <android.support.v7.widget.CardView
                             android:id="@+id/department_card_view"
@@ -199,7 +205,8 @@
                             android:layout_alignParentBottom="true"
                             app:cardCornerRadius="2dp"
                             android:layout_marginBottom="2dp"
-                            android:layout_marginRight="5dp">
+                            android:layout_marginRight="5dp"
+                            android:elevation="0dp">
 
                             <TextView
                                 android:id="@+id/department_text_view"

@@ -52,10 +52,8 @@ public class viewpager_department extends Fragment {
     private String mParam1;
     private String mParam2;
     private ListView mListView;
-    private TextView installationName;
 
     List<Department> departmentList = new ArrayList<>();
-    private ImageView qrImage;
 
     public viewpager_department() {
         // Required empty public constructor
@@ -86,6 +84,7 @@ public class viewpager_department extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        setRetainInstance(true);
     }
 
     @Override
@@ -93,31 +92,6 @@ public class viewpager_department extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_viewpager_department, container, false);
-
-        installationName = view.findViewById(R.id.installation_name_tv);
-        qrImage = view.findViewById(R.id.qr_code_image_view);
-
-        DocumentReference name = FirebaseUtil.getPropertyRefFromFirestore(getActivity());
-
-        name.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document != null && document.exists()) {
-
-                        String name = document.getData().get("name").toString();
-                        installationName.setText("Installation Name: " + name);
-
-                        Log.d("TAG", "DocumentSnapshot data: " + document.getData());
-                    } else {
-                        Log.d("TAG", "No such document");
-                    }
-                } else {
-                    Log.d("TAG", "get failed with ", task.getException());
-                }
-            }
-        });
 
         mListView = (ListView) view.findViewById(R.id.rig_list_view);
 
@@ -147,27 +121,6 @@ public class viewpager_department extends Fragment {
                 }
             }
         });
-
-
-        generateQRCodeID();
         return view;
-    }
-
-
-    private void generateQRCodeID(){
-
-        String propertyID = SharedPrefUtil.getPropertyID(getActivity());
-
-        // Initializing the QR Encoder with your value to be encoded, type you required and Dimension
-        int qrDimension = 800;
-        QRGEncoder qrgEncoder = new QRGEncoder(propertyID.trim(), null, QRGContents.Type.TEXT, qrDimension);
-        try {
-            // Getting QR-Code as Bitmap
-            Bitmap qrBitmap = qrgEncoder.encodeAsBitmap();
-            // Setting Bitmap to ImageView
-            qrImage.setImageBitmap(qrBitmap);
-        } catch (WriterException e) {
-            Log.v("QRGENERATOR", e.toString());
-        }
     }
 }

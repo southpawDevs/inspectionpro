@@ -65,8 +65,7 @@
         <activity android:name=".archiveLayout.ArchiveItemsActivity" />
         <activity
             android:name=".actionItemsLayout.ActionItemsDetailActivity"
-            android:label="@string/title_activity_action_items_detail"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:label="@string/title_activity_action_items_detail"></activity>
 
         <!--&lt;!&ndash; [START firebase_service] &ndash;&gt;-->
         <!--<service-->

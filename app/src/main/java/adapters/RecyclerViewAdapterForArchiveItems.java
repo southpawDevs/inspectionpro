@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 import devs.southpaw.com.inspectionpro.R;
+import devs.southpaw.com.inspectionpro.UIUtil;
 import objects.Inspection;
 import objects.InspectionItem;
 
@@ -54,7 +55,7 @@ public class RecyclerViewAdapterForArchiveItems extends RecyclerView.Adapter<Rec
 
         Inspection currentInspection = inspectionArchiveData.get(position);
 
-        String submittedDate = getStringDateFromDate(currentInspection.getInspection_submitted_at());
+        String submittedDate = UIUtil.getStringDateAndTimeFromDate(currentInspection.getInspection_submitted_at());
         String submittedBy = currentInspection.getInspection_submitted_by_name();
 
         holder.inspectionSubmittedAt.setText("Submitted at: " + submittedDate);
@@ -135,14 +136,5 @@ public class RecyclerViewAdapterForArchiveItems extends RecyclerView.Adapter<Rec
     public void addAll(List<Inspection> list) {
         inspectionArchiveData.addAll(list);
         notifyDataSetChanged();
-    }
-
-    //helper & formatting
-    private String getStringDateFromDate(Date inputDate) {
-        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-        cal.setTime(inputDate);
-
-        String date = DateFormat.format("dd-MMM-yyyy", cal).toString();
-        return date;
     }
 }

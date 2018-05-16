@@ -180,6 +180,12 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
         return departmentRef;
     }
 
+    public static CollectionReference getMembersFromFirestore(Activity activity){
+
+        CollectionReference departmentRef = getPropertyRefFromFirestore(activity).collection("allMembers");
+        return departmentRef;
+    }
+
     public static CollectionReference getUsersFromFirestore(){
 
         CollectionReference usersRef = db.collection("users");

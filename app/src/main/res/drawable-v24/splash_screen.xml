@@ -6,7 +6,7 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/splash_screen_logo"/>
+            android:src="@drawable/inspecpro_splashscreen"/>
     </item>
 
 </layer-list>

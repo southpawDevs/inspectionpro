@@ -84,6 +84,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     String inspectionName;
     String inspectionID;
     int pendingCount;
+    int itemsCount;
     private SimpleDraweeView itemImageView;
     private ConstraintLayout constraintLayout;
     private Activity mActivity;
@@ -155,27 +156,6 @@ public class ItemDetailsActivity extends AppCompatActivity {
     }
 
     private void setPic() {
-        // Get the dimensions of the View
-        int targetW = snapshotImageView.getWidth();
-        int targetH = snapshotImageView.getHeight();
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        //int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        //bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
-
-        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-        snapshotImageView.setImageBitmap(bitmap);
         snapshotImageView.setVisibility(View.VISIBLE);
 
         uploadImageToStorage(selectedItem.getItem_id());
@@ -261,6 +241,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         inspectionName = getIntent().getStringExtra("inspection_name");
         inspectionID = getIntent().getStringExtra("inspection_id");
         pendingCount = getIntent().getIntExtra("inspected_count",0);
+        itemsCount = getIntent().getIntExtra("total_items_count", 0);
         Log.d("itemJson", itemJson);
 
         Gson gson = new Gson();
@@ -439,7 +420,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
         String conditionImageUrl = selectedItem.getItem_condition_photo();
 
         if (conditionImageUrl != null){
-            Glide.with(this).load(conditionImageUrl).centerCrop().into(snapshotImageView);
+            Glide.with(this).load(conditionImageUrl).override(400,300).centerCrop().into(snapshotImageView);
             snapshotImageView.setVisibility(View.VISIBLE);
         }else{
             snapshotImageView.setVisibility(View.GONE);
@@ -447,6 +428,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
     }
 
     private void uploadImageToStorage(final String item_id){
+        Toast.makeText(getBaseContext(),"Uploading condition image "+ selectedItem.getItem_name(), Toast.LENGTH_SHORT).show();
         //initialize storage
         FirebaseStorage storage = FirebaseStorage.getInstance();
         // Create a storage reference from our app
@@ -494,6 +476,8 @@ public class ItemDetailsActivity extends AppCompatActivity {
                 //createButton.setClickable(true);
 
                 //progressBar.setVisibility(View.INVISIBLE);
+
+                populateScreenData();
 
                 return;
             }
@@ -588,7 +572,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
             if (status != 0) {
                 //if current status is zero and is updating to other int (pending should decrease by 1)
                 inspectionsColl.document(inspectionID).update(
-                        "inspection_pending_count", pendingCount -= 1
+                        "inspection_pending_count", pendingCount += 1
                 );
             } else {
 
@@ -599,7 +583,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
             if (status == 0) {
                 //(pending should increase by 1 after revert to normal state)
                 inspectionsColl.document(inspectionID).update(
-                        "inspection_pending_count", pendingCount += 1
+                        "inspection_pending_count", pendingCount -= 1
                 );
             } else {
 
@@ -621,8 +605,10 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         DocumentReference devHouse = FirebaseUtil.getPropertyRefFromFirestore(activity);
                         CollectionReference inspectionsColl = devHouse.collection("inspections");
                         inspectionsColl.document(inspectionID).update(
-                                "inspection_pending_count", pendingCount -= 1
+                                "inspection_pending_count", pendingCount -= 1,
+                                "inspection_items_count",itemsCount -=1
                         );
+
 
                         Toast.makeText(getBaseContext(), "Item deleted", Toast.LENGTH_SHORT).show();
                         finish();

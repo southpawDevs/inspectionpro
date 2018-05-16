@@ -159,6 +159,7 @@ public class MyRigFragment extends Fragment {
     //view pager functions
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getChildFragmentManager());
+        adapter.addFragment(new viewPager_join(), "INSTALLATION");
         adapter.addFragment(new viewpager_department(), "DEPARTMENT");
         adapter.addFragment(new viewpager_members(), "MEMBERS");
 

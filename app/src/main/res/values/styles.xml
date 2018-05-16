@@ -23,6 +23,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:actionMenuTextColor">@color/colorPrimaryWhite</item>
+        <item name="android:fitsSystemWindows">true</item>
 
     </style>
 

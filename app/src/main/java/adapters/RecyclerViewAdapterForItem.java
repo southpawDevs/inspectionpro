@@ -82,12 +82,12 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
 
     private String pid = "";
 
-    public RecyclerViewAdapterForItem(List<InspectionItem> itemsData, Context context, Activity activity, Department department, String pid2) {
+    public RecyclerViewAdapterForItem(List<InspectionItem> itemsData, Context context, Activity activity, String pid2) {
         this.inspectionItemsData = itemsData;
         mOnClickListener = null;
         mContext = context;
         mActivity = activity;
-        departmentObject = department;
+        //departmentObject = department;
         pid = pid2;
     }
 
@@ -153,14 +153,14 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
             holder.itemComments.setText(dataObject.getItem_comments());
         }
 
-        if(TextUtils.isEmpty(departmentObject.getDepartment_name())){
+//        if(TextUtils.isEmpty(departmentObject.getDepartment_name())){
             holder.departmentTV.setVisibility(View.GONE);
-        }else{
-
-            holder.departmentCV.setCardBackgroundColor(Color.parseColor(departmentObject.getDepartment_color_hex()));
-            holder.departmentTV.setVisibility(View.VISIBLE);
-            holder.departmentTV.setText(departmentObject.getDepartment_name());
-        }
+//        }else{
+//
+//            holder.departmentCV.setCardBackgroundColor(Color.parseColor(departmentObject.getDepartment_color_hex()));
+//            holder.departmentTV.setVisibility(View.VISIBLE);
+//            holder.departmentTV.setText(departmentObject.getDepartment_name());
+//        }
 
         viewBinderHelper.bind(holder.swipeRevealLayout, dataObject.getItem_id());
     }
@@ -260,17 +260,14 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
 
                     String id = selectedItem.getItem_id();
 
-                    if (selectedItem.getItem_status() != 2) {
-                        //updateDoneStatusToFirebase(id, 2);
-                        //Toast.makeText(mContext, "camera open", Toast.LENGTH_SHORT).show();
-                        dispatchTakePictureIntent();
+                    dispatchTakePictureIntent();
 
-                        String item_id = selectedItem.getItem_id();
-                        Intent intent = new Intent("snapshot_id");
-                        intent.putExtra("photo_path", mCurrentPhotoPath);
-                        intent.putExtra("item_id",item_id);
-                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                    }
+                    String item_id = selectedItem.getItem_id();
+                    Intent intent = new Intent("snapshot_id");
+                    intent.putExtra("photo_path", mCurrentPhotoPath);
+                    intent.putExtra("item_id",item_id);
+                    intent.putExtra("item_name",selectedItem.getItem_name());
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 
                     viewBinderHelper.closeLayout(id);
                 }
@@ -304,7 +301,7 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
                     intentItemDetail.putExtra("inspection_name" , inspectionName);
                     intentItemDetail.putExtra("inspection_id" , inspectionID);
                     intentItemDetail.putExtra("inspected_count" , inspectedCount);
-
+                    intentItemDetail.putExtra("total_items_count" , inspectionItemsData.size());
                     context.startActivity(intentItemDetail);
                 }
             });
@@ -349,7 +346,7 @@ public class RecyclerViewAdapterForItem extends RecyclerView.Adapter<RecyclerVie
 
                         int pendingCount = 0;
                         for (int l=0; l<inspectionItemsData.size();l++){
-                            if (inspectionItemsData.get(l).getItem_status() == 0){
+                            if (inspectionItemsData.get(l).getItem_status() != 0){
                                 pendingCount += 1;
                             }
                         }

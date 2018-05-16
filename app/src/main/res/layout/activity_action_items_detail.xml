@@ -8,7 +8,7 @@
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
@@ -20,12 +20,12 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_action_items_detail" />
+    <!--<include layout="@layout/content_action_items_detail" />-->
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_marginTop="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -195,7 +195,7 @@
                         android:layout_marginRight="20dp"
                         android:layout_marginTop="10dp"
                         android:fontFamily="@font/comfortaa"
-                        android:text="Report Summary (developing))"
+                        android:text="Report Summary"
                         android:textAlignment="center"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="14sp" />
@@ -248,7 +248,7 @@
                         android:layout_marginTop="10dp"
                         android:fontFamily="@font/comfortaa"
                         android:gravity="center"
-                        android:text="Has this item been rectified? (developing)"
+                        android:text="Has this item been rectified?"
                         android:textAllCaps="false"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="14sp" />
@@ -278,7 +278,7 @@
                                 app:cardCornerRadius="38dp">
 
                                 <Button
-                                    android:id="@+id/red_button"
+                                    android:id="@+id/ai_red_button"
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:background="@color/colorStatusRed"
@@ -299,7 +299,6 @@
                                 app:cardCornerRadius="3dp">
 
                                 <Button
-
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:background="@color/colorPrimaryDark"
@@ -326,7 +325,7 @@
                                 app:cardCornerRadius="38dp">
 
                                 <Button
-                                    android:id="@+id/green_button"
+                                    android:id="@+id/ai_green_button"
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:background="@color/colorStatusGreen"

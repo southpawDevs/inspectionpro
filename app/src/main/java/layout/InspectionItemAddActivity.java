@@ -54,6 +54,8 @@ public class InspectionItemAddActivity extends AppCompatActivity {
     Button addImage_button;
     ProgressBar progressBar;
 
+    Uri selectedImagePath;
+
     public static final int pickedImage = 0123;
 
     @Override
@@ -110,6 +112,7 @@ public class InspectionItemAddActivity extends AppCompatActivity {
         if (requestCode == pickedImage) {
             //TODO: action
             Uri imageUri = data.getData();
+            selectedImagePath = data.getData();
             item_image_view.setImageURI(imageUri);
             showImage();
         }
@@ -185,7 +188,7 @@ public class InspectionItemAddActivity extends AppCompatActivity {
 
                         //progressBar.setVisibility(View.INVISIBLE);
 
-                        uploadImageToStorage(documentReference, item_id);
+                        uploadImageToStorage2(documentReference, item_id);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -219,6 +222,53 @@ public class InspectionItemAddActivity extends AppCompatActivity {
         byte[] data = baos.toByteArray();
 
         UploadTask uploadTask = imagesItemRef.child(item_id).putBytes(data);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+                // Handle unsuccessful uploads
+                Toast.makeText(getBaseContext(),"Fail to add item", Toast.LENGTH_SHORT).show();
+
+                createButton.setClickable(true);
+
+                progressBar.setVisibility(View.INVISIBLE);
+
+                return;
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                //taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                docRef.update("item_id", item_id);
+                docRef.update("item_photo", String.valueOf(downloadUrl));
+
+                Toast.makeText(getBaseContext(),"Item Added", Toast.LENGTH_SHORT).show();
+
+                createButton.setClickable(true);
+
+                progressBar.setVisibility(View.INVISIBLE);
+
+                finish();
+
+                return;
+            }
+        });
+    }
+
+    private void uploadImageToStorage2(final DocumentReference docRef, final String item_id){
+        //initialize storage
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        // Create a storage reference from our app
+        StorageReference storageRef = storage.getReference();
+
+        // Create a child reference
+        // imagesRef now points to "images"
+        StorageReference imagesItemRef = storageRef.child("oNJZmUlwxGxAymdyKoIV").child("images").child("inspection_items");
+
+        //store image to storage
+
+        UploadTask uploadTask = imagesItemRef.child(item_id).putFile(selectedImagePath);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {

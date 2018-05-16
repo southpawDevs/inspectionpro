@@ -43,6 +43,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.storage.UploadTask;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -143,18 +146,29 @@ public class AccountFragment extends Fragment {
         emailTV.setText(user.getEmail());
         uid.setText(user.getUid());
 
-        Uri imagePath = user.getPhotoUrl();
-
-        if (imagePath == null) {
-            IconicsDrawable userIcon = new IconicsDrawable(getActivity())
-                    .icon(GoogleMaterial.Icon.gmd_photo_camera)
-                    .color(Color.parseColor("#303F9F"))
-                    .sizeDp(80)
-                    .paddingDp(18);
-            profilePicIV.setImageDrawable(userIcon);
-        }else{
-            Glide.with(this).load(imagePath).centerCrop().into(profilePicIV);
-        }
+        CollectionReference usersColl = FirebaseUtil.getUsersFromFirestore();
+        usersColl.document(user.getUid()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                String path = "";
+                if(documentSnapshot.exists()){
+                    User userObj = documentSnapshot.toObject(User.class);
+                    path = userObj.getProfile_picture();
+                }
+                Uri imagePath = Uri.parse(path);
+                Glide.with(getActivity()).load(imagePath).centerCrop().into(profilePicIV);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                IconicsDrawable userIcon = new IconicsDrawable(getActivity())
+                        .icon(GoogleMaterial.Icon.gmd_photo_camera)
+                        .color(Color.parseColor("#303F9F"))
+                        .sizeDp(80)
+                        .paddingDp(18);
+                profilePicIV.setImageDrawable(userIcon);
+            }
+        });
 
         usernameET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 

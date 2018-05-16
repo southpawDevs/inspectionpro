@@ -122,7 +122,7 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    String depID = documentSnapshot.getString("department_id");
+                    String depID = documentSnapshot.getString("member_department_id");
                     getInspectionDataFromFireStore(refreshing, depID);
                 }else{
                     new MaterialDialog.Builder(context)
@@ -266,7 +266,7 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
                         }
                     });
 
-                    inspectionAdapter = new RecyclerViewAdapterForInspection(inspections, getContext());
+                    inspectionAdapter = new RecyclerViewAdapterForInspection(inspections, getContext(), getActivity());
 
                     recyclerView.setAdapter(inspectionAdapter);
                     recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -337,7 +337,7 @@ public class InspectionFragment extends Fragment implements RecyclerViewAdapterF
                         }
                     });
 
-                    inspectionAdapter = new RecyclerViewAdapterForInspection(inspections, getContext());
+                    inspectionAdapter = new RecyclerViewAdapterForInspection(inspections, getContext(), getActivity());
 
                     recyclerView.setAdapter(inspectionAdapter);
                     recyclerView.setItemAnimator(new DefaultItemAnimator());
