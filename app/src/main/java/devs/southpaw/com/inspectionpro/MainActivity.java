@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements InspectionFragmen
     private AccountHeader headerResult;
     //if you want to update the items at a later time it is recommended to keep it in a variable
     PrimaryDrawerItem inspecItem = new PrimaryDrawerItem().withIdentifier(1).withName("Inspections").withIcon(GoogleMaterial.Icon.gmd_check);
-    PrimaryDrawerItem myRigItem = new PrimaryDrawerItem().withIdentifier(3).withName("My Rig (developing)").withIcon(GoogleMaterial.Icon.gmd_home);
+    PrimaryDrawerItem myRigItem = new PrimaryDrawerItem().withIdentifier(3).withName("My Rig").withIcon(GoogleMaterial.Icon.gmd_home);
     PrimaryDrawerItem accountItem = new PrimaryDrawerItem().withIdentifier(2).withName("Account").withIcon(GoogleMaterial.Icon.gmd_person);
     PrimaryDrawerItem settingsItem = new PrimaryDrawerItem().withIdentifier(4).withName("Settings (developing)").withIcon(GoogleMaterial.Icon.gmd_settings);
     PrimaryDrawerItem helpItem = new PrimaryDrawerItem().withIdentifier(5).withName("Help & feedback (developing)").withIcon(GoogleMaterial.Icon.gmd_help);

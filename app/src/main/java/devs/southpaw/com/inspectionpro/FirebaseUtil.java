@@ -221,7 +221,7 @@ public class FirebaseUtil extends FirebaseInstanceIdService {
 
     public static CollectionReference getActionItems(final Activity activity){
 
-        final CollectionReference actionItemsColl = getPropertyRefFromFirestore(activity).collection("actionItems");
+        final CollectionReference actionItemsColl = getPropertyRefFromFirestore(activity).collection("actionitems");
 
         return  actionItemsColl;
     }

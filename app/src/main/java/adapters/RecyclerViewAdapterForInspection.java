@@ -1,13 +1,11 @@
 package adapters;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -162,9 +160,9 @@ public class RecyclerViewAdapterForInspection extends RecyclerView.Adapter<Recyc
         holder.inspectionOverdue.setText(dueInText);
 
         //set item count
-        String pendingCounts  = String.valueOf(currentInspection.getInspection_pending_count());
+        String checkedCounts  = String.valueOf(currentInspection.getInspection_checked_count());
         String totalCounts  = String.valueOf(currentInspection.getInspection_items_count());
-        holder.inspectionItemsCount.setText(pendingCounts+"/"+totalCounts + " items to inspect");
+        holder.inspectionItemsCount.setText(checkedCounts+"/"+totalCounts + " items to inspect");
 
         //get department obj
         CollectionReference depColl = FirebaseUtil.getDepartmentsFromFirestore(mActivity);

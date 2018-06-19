@@ -550,7 +550,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
     private void addActionItem(final String existingItemID, InspectionItem inspectionItem, final Uri uri){
 
         FirebaseUser user = FirebaseUtil.getFirebaseUser();
-        final CollectionReference actionItemsColl = devHousePropertyDoc.collection("actionItems");
+        final CollectionReference actionItemsColl = devHousePropertyDoc.collection("actionitems");
 
         //initailize action item
         final ActionItems actionItem = new ActionItems(null, existingItemID, inspectionItem.getItem_name(), inspectionItem.getItem_comments(), new Date(), user.getEmail(), null, selectedInspection.getInspection_name(), selectedInspection.getInspection_id(),false);
@@ -678,7 +678,7 @@ public class InspectionDetailsActivity extends AppCompatActivity implements Recy
                         }
 
                         inspectionsColl.document(selectedInspection.getInspection_id()).update(
-                                "inspection_pending_count", checkedCount
+                                "inspection_checked_count", checkedCount
                         );
 
                         setPic();

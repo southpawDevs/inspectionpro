@@ -572,7 +572,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
             if (status != 0) {
                 //if current status is zero and is updating to other int (pending should decrease by 1)
                 inspectionsColl.document(inspectionID).update(
-                        "inspection_pending_count", pendingCount += 1
+                        "inspection_checked_count", pendingCount += 1
                 );
             } else {
 
@@ -583,7 +583,7 @@ public class ItemDetailsActivity extends AppCompatActivity {
             if (status == 0) {
                 //(pending should increase by 1 after revert to normal state)
                 inspectionsColl.document(inspectionID).update(
-                        "inspection_pending_count", pendingCount -= 1
+                        "inspection_checked_count", pendingCount -= 1
                 );
             } else {
 
@@ -605,7 +605,6 @@ public class ItemDetailsActivity extends AppCompatActivity {
                         DocumentReference devHouse = FirebaseUtil.getPropertyRefFromFirestore(activity);
                         CollectionReference inspectionsColl = devHouse.collection("inspections");
                         inspectionsColl.document(inspectionID).update(
-                                "inspection_pending_count", pendingCount -= 1,
                                 "inspection_items_count",itemsCount -=1
                         );
 

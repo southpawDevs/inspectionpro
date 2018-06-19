@@ -42,7 +42,9 @@ import com.stfalcon.frescoimageviewer.ImageViewer;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import devs.southpaw.com.inspectionpro.FirebaseUtil;
 import devs.southpaw.com.inspectionpro.R;
@@ -69,6 +71,7 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
     private CardView itemStatusGreen;
     private CardView itemStatusRed;
 
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,7 +183,7 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
 
                                     //rectified Action Item here
-                                    deleteAIFirestore(selectedActionItem.getAi_id());
+                                    updateAIStatusToFirestore();
                                 }
                             })
                             .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -305,12 +308,26 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
         }
     }
 
-    private void updateAIStatusToFirestore(String ai_item_id, final Boolean status) {
+    private void updateAIStatusToFirestore() {
 
-        DocumentReference aiItemRef = FirebaseUtil.getActionItem(mActivity,ai_item_id);
-        aiItemRef.delete();
+        String inspectionId = selectedActionItem.getInspection_id();
+        selectedActionItem.setAi_rectified_status(true);
+
+        String pid = SharedPrefUtil.getPropertyID(this);
+        CollectionReference aiHistoryColl = db.collection("properties").document(pid).collection("archives").document(inspectionId).collection("action_items_history");
 
 
+        aiHistoryColl.add(selectedActionItem).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentReference> task) {
+
+                if (task.isSuccessful()){
+                    deleteAIFirestore(selectedActionItem.getAi_id());
+                }else{
+                    Toast.makeText(getApplicationContext(), "Fail to rectify Action Item", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void deleteAIFirestore(String ai_item_id) {
@@ -323,7 +340,7 @@ public class ActionItemsDetailActivity extends AppCompatActivity {
                     finish();
                     Toast.makeText(getApplicationContext(), "Action Item rectified", Toast.LENGTH_SHORT).show();
                 }else{
-                    Toast.makeText(getApplicationContext(), "Fail to rectify Action Item", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Action Item rectified but fail to remove action item", Toast.LENGTH_SHORT).show();
                 }
             }
         });

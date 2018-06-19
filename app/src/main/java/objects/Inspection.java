@@ -21,7 +21,7 @@ public class Inspection{
     private Date inspection_submitted_at;
     private int inspection_status;
     private int inspection_items_count;
-    private int inspection_pending_count;
+    private int inspection_checked_count;
     private int inspection_days;
     private List<InspectionItem> inspection_items_object = new ArrayList<>();
     private int inspection_to_be_dued;
@@ -98,8 +98,8 @@ public class Inspection{
         return inspection_to_be_dued;
     }
 
-    public int getInspection_pending_count() {
-        return inspection_pending_count;
+    public int getInspection_checked_count() {
+        return inspection_checked_count;
     }
 
     public String getInspection_department() {
@@ -148,8 +148,8 @@ public class Inspection{
         this.inspection_to_be_dued = inspection_to_be_dued;
     }
 
-    public void setInspection_pending_count(int inspection_pending_count) {
-        this.inspection_pending_count = inspection_pending_count;
+    public void setInspection_checked_count(int inspection_checked_count) {
+        this.inspection_checked_count = inspection_checked_count;
     }
 
     public void setInspection_days(int inspection_days) {

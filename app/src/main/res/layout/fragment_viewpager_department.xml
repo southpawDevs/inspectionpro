@@ -30,4 +30,18 @@
 
     </ListView>
 
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="2dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/comfortaa"
+        android:text="if you wish to add new departments, please contact the InspecPro team at inspectionpro@gmail.com"
+        android:textAlignment="center"
+        android:textColor="@color/colorGrey"
+        android:textSize="11sp" />
+
 </LinearLayout>
